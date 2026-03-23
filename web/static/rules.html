@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DH|S2 Rules</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#0a0a1a;color:#e2e8f0;padding:32px 40px;line-height:1.6}
+h1{font-size:1.4rem;margin-bottom:4px;background:linear-gradient(135deg,#3b82f6,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{color:#64748b;font-size:0.85rem;margin-bottom:28px}
+.stats{display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap}
+.stats span{font-size:0.75rem;padding:4px 12px;border-radius:6px;border:1px solid #1e293b;background:#0c0c18;color:#94a3b8;font-weight:600}
+.stats .green{color:#22c55e;border-color:#22c55e30}
+.section{margin-bottom:28px}
+.section-title{font-size:0.7rem;text-transform:uppercase;letter-spacing:2px;color:#3b82f6;font-weight:700;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #1e293b}
+.rule{display:flex;gap:12px;margin-bottom:10px;align-items:flex-start}
+.rule-num{min-width:24px;height:24px;border-radius:50%;background:#1e293b;color:#3b82f6;font-size:0.7rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.rule-text{font-size:0.85rem;color:#e2e8f0}
+.rule-text strong{color:#fff}
+.rule-detail{font-size:0.75rem;color:#64748b;margin-top:2px}
+.highlight{color:#22c55e;font-weight:600}
+.warn{color:#f59e0b;font-weight:600}
+.danger{color:#ef4444;font-weight:600}
+.divider{border:none;border-top:1px solid #1e293b;margin:24px 0}
+.note{font-size:0.78rem;color:#64748b;font-style:italic;padding:10px 14px;border-left:3px solid #3b82f6;background:#3b82f608;border-radius:0 6px 6px 0;margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:0.78rem;margin-top:8px}
+th{text-align:left;padding:6px 8px;color:#64748b;font-size:0.68rem;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #1e293b}
+td{padding:6px 8px;border-bottom:1px solid #1e293b10}
+</style>
+</head><body>
+
+<h1>DH|S2 Strategy Rules</h1>
+<p class="subtitle">Delta Hero | Setup 2 -- Complete MECE ruleset for 6E futures morning session</p>
+<div class="stats">
+  <span>6E Futures (Euro FX)</span>
+  <span>5-min bars</span>
+  <span>8:00-12:00 IST</span>
+  <span class="green">259 trades | 71% WR | PF 11.1 | +$68K</span>
+</div>
+
+<div class="section">
+  <div class="section-title">A. Entry Conditions (ALL must be true)</div>
+
+  <div class="rule">
+    <div class="rule-num">1</div>
+    <div class="rule-text">
+      <strong>Time window:</strong> 8:00 AM - 12:00 PM IST only
+      <div class="rule-detail">No entries outside this window. Period.</div>
+    </div>
+  </div>
+
+  <div class="rule">
+    <div class="rule-num">2</div>
+    <div class="rule-text">
+      <strong>ATR > 5 pips</strong> (0.00050)
+      <div class="rule-detail">Minimum volatility filter. Below 5 pips = chop, no edge.</div>
+    </div>
+  </div>
+
+  <div class="rule">
+    <div class="rule-num">3</div>
+    <div class="rule-text">
+      <strong>Delta confirms direction:</strong>
+      <div class="rule-detail">
+        <span class="highlight">LONG:</span> Current bar delta > 0 (buyers stepping in)<br>
+        <span class="danger">SHORT:</span> Current bar delta < 0 (sellers stepping in)
+      </div>
+    </div>
+  </div>
+
+  <div class="rule">
+    <div class="rule-num">4</div>
+    <div class="rule-text">
+      <strong>Cum delta momentum:</strong> Last 6 bars vs previous 5 bars
+      <div class="rule-detail">
+        <span class="highlight">LONG:</span> Sum of last 6 bars' delta > sum of prev 5 bars' delta (buying accelerating)<br>
+        <span class="danger">SHORT:</span> Sum of last 6 bars' delta < sum of prev 5 bars' delta (selling accelerating)
+      </div>
+    </div>
+  </div>
+
+  <div class="rule">
+    <div class="rule-num">5</div>
+    <div class="rule-text">
+      <strong>VWAP aligned:</strong>
+      <div class="rule-detail">
+        <span class="highlight">LONG:</span> Price BELOW VWAP (buying into value)<br>
+        <span class="danger">SHORT:</span> Price ABOVE VWAP (selling into premium)
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">B. Exit Rules</div>
+
+  <div class="rule">
+    <div class="rule-num">1</div>
+    <div class="rule-text">
+      <strong>Stop loss:</strong> 1.0x ATR from entry
+      <div class="rule-detail">E.g., ATR = 6 pips -> SL = 6 pips from entry. Hard stop, no moving.</div>
+    </div>
+  </div>
+
+  <div class="rule">
+    <div class="rule-num">2</div>
+    <div class="rule-text">
+      <strong>Trailing stop:</strong> 0.5x ATR
+      <div class="rule-detail">Once in profit, trail at half ATR. Locks in gains while giving room.</div>
+    </div>
+  </div>
+
+  <div class="rule">
+    <div class="rule-num">3</div>
+    <div class="rule-text">
+      <strong>Time cutoff:</strong> Exit all positions by 12:00 PM IST
+      <div class="rule-detail">No holding past the morning window.</div>
+    </div>
+  </div>
+
+  <div class="rule">
+    <div class="rule-num">4</div>
+    <div class="rule-text">
+      <strong>Max hold:</strong> 30 bars (2.5 hours)
+      <div class="rule-detail">If trade hasn't hit SL or trail in 30 bars, exit at market.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">C. Risk Management</div>
+
+  <div class="rule">
+    <div class="rule-num">1</div>
+    <div class="rule-text">
+      <strong>Max 1 trade per day</strong>
+      <div class="rule-detail">After exit (win or loss), done for the day. No revenge trading.</div>
+    </div>
+  </div>
+
+  <div class="rule">
+    <div class="rule-num">2</div>
+    <div class="rule-text">
+      <strong>No entry after 12:00 PM IST</strong>
+      <div class="rule-detail">Kill switch. Even if all conditions are met after noon, stand down.</div>
+    </div>
+  </div>
+
+  <div class="rule">
+    <div class="rule-num">3</div>
+    <div class="rule-text">
+      <strong>Cooldown:</strong> No re-entry on the same bar as exit
+      <div class="rule-detail">Wait for the next signal after a trade closes.</div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section">
+  <div class="section-title">D. Level Reference (for context, not entry condition)</div>
+  <div class="note">Levels inform WHERE to look, but are NOT required for entry. The strategy triggered 10 winning entries with 0 nearby levels. The delta + VWAP + momentum is the edge.</div>
+
+  <table>
+    <thead><tr><th>Level Type</th><th>Source</th><th>Threshold</th></tr></thead>
+    <tbody>
+      <tr><td>Floor Pivots</td><td>PP, R1-R3, S1-S3</td><td rowspan="8">Within 0.5x ATR of price</td></tr>
+      <tr><td>Fib Pivots</td><td>fPP, fR1-fR3, fS1-fS3</td></tr>
+      <tr><td>Previous Day</td><td>pd_high, pd_low, pd_close, pd_open</td></tr>
+      <tr><td>Weekly</td><td>wk_high, wk_low</td></tr>
+      <tr><td>Monthly</td><td>mo_high, mo_low</td></tr>
+      <tr><td>VPOC / TPOC</td><td>pd, wk, mo, asia, ldn, ny</td></tr>
+      <tr><td>VWAP</td><td>Session VWAP</td></tr>
+      <tr><td>Fib Retracement</td><td>38.2%, 50%, 61.8%</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<hr class="divider">
+
+<div class="section">
+  <div class="section-title">E. Backtest Results</div>
+  <table>
+    <thead><tr><th>Metric</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>Period</td><td>Jun 2025 - Apr 2026 (9 months)</td></tr>
+      <tr><td>Total Trades</td><td>259</td></tr>
+      <tr><td>Win Rate</td><td>71%</td></tr>
+      <tr><td>Profit Factor</td><td>11.1</td></tr>
+      <tr><td>Avg Win</td><td>+$404</td></tr>
+      <tr><td>Avg Loss</td><td>-$90</td></tr>
+      <tr><td>Total P&L</td><td>+$67,890</td></tr>
+      <tr><td>Max Consecutive Losses</td><td>~3</td></tr>
+      <tr><td>Entry Type</td><td>DH (Delta Hero) + VWAP + Momentum</td></tr>
+      <tr><td>Exit Type</td><td>Trail 0.5x ATR, SL 1.0x ATR</td></tr>
+    </tbody>
+  </table>
+</div>
+
+</body></html>

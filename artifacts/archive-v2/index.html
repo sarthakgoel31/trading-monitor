@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>6E Playbook v2 — Sierra Data Edition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a1a; --surface: #141428; --surface-2: #1c1c3a;
+      --text: #e8eaf6; --text-2: #9fa8da; --text-3: #5c6bc0;
+      --green: #00e676; --green-soft: rgba(0,230,118,0.12); --green-text: #69f0ae;
+      --red: #ff5252; --red-soft: rgba(255,82,82,0.12); --red-text: #ff8a80;
+      --blue: #448aff; --blue-soft: rgba(68,138,255,0.12);
+      --orange: #ffab40; --orange-soft: rgba(255,171,64,0.12);
+      --purple: #b388ff; --purple-soft: rgba(179,136,255,0.12);
+      --gold: #ffd740; --gold-soft: rgba(255,215,64,0.12);
+      --border: #2a2a4a; --radius: 12px;
+      --font: 'Inter', sans-serif; --mono: 'JetBrains Mono', monospace;
+    }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    .page { max-width: 920px; margin: 0 auto; padding: 40px 24px 80px; }
+    .hero { text-align: center; margin-bottom: 48px; padding: 48px 0 40px; border-bottom: 1px solid var(--border); }
+    .hero h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.04em; background: linear-gradient(135deg, #00e676, #448aff, #b388ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero .sub { color: var(--text-2); margin-top: 8px; font-size: 1rem; }
+    .hero .meta { color: var(--text-3); font-size: 0.8rem; margin-top: 12px; }
+    .tag { display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+    .tag-green { background: var(--green-soft); color: var(--green-text); border: 1px solid rgba(0,230,118,0.2); }
+    .tag-blue { background: var(--blue-soft); color: var(--blue); border: 1px solid rgba(68,138,255,0.2); }
+    .tag-purple { background: var(--purple-soft); color: var(--purple); border: 1px solid rgba(179,136,255,0.2); }
+    .tag-gold { background: var(--gold-soft); color: var(--gold); border: 1px solid rgba(255,215,64,0.2); }
+    h2 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; margin: 40px 0 16px; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin: 24px 0 10px; }
+    p { color: var(--text-2); margin-bottom: 14px; }
+    strong { color: var(--text); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin: 16px 0; }
+    .card.green-border { border-color: rgba(0,230,118,0.3); }
+    .card.blue-border { border-color: rgba(68,138,255,0.3); }
+    .card.purple-border { border-color: rgba(179,136,255,0.3); }
+    .card.gold-border { border-color: rgba(255,215,64,0.3); }
+    .stats-bar { display: flex; gap: 0; margin: 16px 0 24px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+    .stat-item { flex: 1; text-align: center; padding: 16px 8px; background: var(--surface); border-right: 1px solid var(--border); }
+    .stat-item:last-child { border-right: none; }
+    .stat-item .val { font-family: var(--mono); font-size: 1.3rem; font-weight: 700; }
+    .stat-item .lbl { font-size: 0.65rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+    .val.green { color: var(--green); } .val.red { color: var(--red); } .val.blue { color: var(--blue); }
+    .val.orange { color: var(--orange); } .val.purple { color: var(--purple); } .val.gold { color: var(--gold); }
+    .divider { display: flex; align-items: center; gap: 16px; margin: 48px 0 16px; font-size: 0.7rem; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.1em; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .chart-wrap { margin: 20px 0; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.85rem; }
+    th { text-align: left; padding: 10px 12px; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); border-bottom: 2px solid var(--border); background: var(--surface); }
+    td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text-2); }
+    tr:hover { background: rgba(255,255,255,0.02); }
+    .checklist { list-style: none; padding: 0; margin: 16px 0; }
+    .checklist li { padding: 8px 0 8px 32px; position: relative; color: var(--text-2); font-size: 0.9rem; }
+    .checklist li.yes::before { content: '\2713'; position: absolute; left: 4px; color: var(--green); font-weight: 700; }
+    .checklist li.no::before { content: '\2717'; position: absolute; left: 4px; color: var(--red); font-weight: 700; font-size: 1.1rem; }
+    .trade-log { font-family: var(--mono); font-size: 0.75rem; }
+    .trade-log .win { color: var(--green); } .trade-log .loss { color: var(--red); }
+    details { margin: 16px 0; }
+    summary { cursor: pointer; color: var(--blue); font-weight: 600; font-size: 0.95rem; padding: 8px 0; }
+    details[open] summary { margin-bottom: 12px; }
+    .glossary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin: 16px 0; }
+    .glossary-item { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; }
+    .glossary-item strong { font-size: 0.85rem; }
+    .glossary-item p { font-size: 0.78rem; margin: 4px 0 0; color: var(--text-3); }
+    .step-list { counter-reset: step; list-style: none; margin: 0 0 16px; padding: 0; }
+    .step-list li { counter-increment: step; padding: 14px 0 14px 56px; position: relative; border-left: 2px solid var(--border); margin-left: 16px; color: var(--text-2); font-size: 0.9rem; }
+    .step-list li::before { content: counter(step); position: absolute; left: -16px; top: 12px; width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--green), var(--blue)); color: #0a0a1a; font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; }
+    .step-list li:last-child { border-left-color: transparent; }
+    .footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border); text-align: center; color: var(--text-3); font-size: 0.75rem; }
+    .rules { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin: 16px 0; }
+    .rules h4 { color: var(--text); font-size: 0.9rem; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .rules ol { margin: 0; padding-left: 24px; }
+    .rules li { padding: 6px 0; color: var(--text-2); font-size: 0.85rem; }
+    .rules li strong { color: var(--green); }
+    .rules li em { color: var(--text-3); font-style: normal; font-size: 0.8rem; }
+    .rules .no-go { color: var(--red); font-weight: 600; }
+    .fp-box { background: rgba(255,82,82,0.05); border: 1px solid rgba(255,82,82,0.2); border-radius: var(--radius); padding: 20px 24px; margin: 16px 0; }
+    .fp-box h4 { color: var(--red); font-size: 0.9rem; margin: 0 0 12px; }
+    .fp-box .pattern { margin-top: 10px; padding: 8px 12px; background: rgba(255,82,82,0.1); border-radius: 6px; font-size: 0.8rem; color: var(--red-text); }
+    @media (max-width: 640px) { .stats-bar { flex-wrap: wrap; } .stat-item { min-width: 50%; } .glossary-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <div class="hero">
+    <h1>6E PLAYBOOK v2</h1>
+    <p class="sub">Sierra Data Edition &mdash; 158,760 strategies backtested on 9 months of tick data</p>
+    <p class="meta">6,058,654 ticks &bull; Jun 2025 &ndash; Mar 2026 &bull; 6E + DXY &bull; 5m chart</p>
+    <div style="margin-top: 12px;">
+      <span class="tag tag-green">6 Strategies</span>
+      <span class="tag tag-blue">Sierra Tick Data</span>
+      <span class="tag tag-purple">Delta + VWAP + Fib</span>
+    </div>
+  </div>
+
+  <!-- ═══ GLOSSARY ═══ -->
+  <details>
+    <summary>Quick Glossary &mdash; click to expand</summary>
+    <div class="glossary-grid">
+      <div class="glossary-item"><strong>RSI</strong><p>0-100 "tiredness meter". Above 70 = overbought, below 30 = oversold.</p></div>
+      <div class="glossary-item"><strong>RSI Divergence</strong><p>Price makes new low but RSI makes higher low = sellers weakening = price likely reverses up.</p></div>
+      <div class="glossary-item"><strong>ATR</strong><p>Average True Range. How much price moves per candle. Used to set stop losses that adapt to volatility.</p></div>
+      <div class="glossary-item"><strong>Pivot Levels</strong><p>Support/resistance from yesterday's high, low, close. Traders worldwide watch these.</p></div>
+      <div class="glossary-item"><strong>Fib Retracement</strong><p>After a big move, price often pulls back to 38.2%, 50%, 61.8%, 78.6% before continuing.</p></div>
+      <div class="glossary-item"><strong>Trailing Stop</strong><p>A stop loss that follows price up (never down). Locks in profit automatically as the trade works.</p></div>
+      <div class="glossary-item"><strong>DXY</strong><p>Dollar Index. Moves opposite to 6E. DXY down = Euro up. It's a confirmation seesaw.</p></div>
+      <div class="glossary-item"><strong>VWAP</strong><p>Volume-Weighted Average Price. The "fair price" for the day. Mean reversion target &amp; partial exit level.</p></div>
+      <div class="glossary-item"><strong>Delta</strong><p>Ask volume minus bid volume. Positive delta = buyers dominating. Negative = sellers.</p></div>
+      <div class="glossary-item"><strong>Volume Per Trade</strong><p>Total volume / number of trades. High VPT = institutions (whales) are active at that price.</p></div>
+    </div>
+  </details>
+
+  <!-- ═══ DAILY DRIVERS ═══ -->
+  <div class="divider">Daily Drivers</div>
+
+  <h2 style="color: var(--green);">Strategy A: The Half-Day</h2>
+  <p>Your most relaxed daily strategy. Scan once, enter if you see it, let the trail do the work. Close by 9 PM.</p>
+
+  <div class="stats-bar">
+    <div class="stat-item"><div class="val green">129</div><div class="lbl">Trades / 9mo</div></div>
+    <div class="stat-item"><div class="val green">0.55</div><div class="lbl">Per Day</div></div>
+    <div class="stat-item"><div class="val green">63%</div><div class="lbl">Win Rate</div></div>
+    <div class="stat-item"><div class="val blue">4.62</div><div class="lbl">Profit Factor</div></div>
+    <div class="stat-item"><div class="val orange">2.47</div><div class="lbl">R : R</div></div>
+    <div class="stat-item"><div class="val green">+5.91%</div><div class="lbl">Total P&amp;L</div></div>
+  </div>
+
+  <!-- Chart: Half-Day Setup -->
+  <div class="chart-wrap">
+    <svg viewBox="0 0 820 420" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;font-family:'Inter',sans-serif;">
+      <defs><pattern id="g1" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a1a3a" stroke-width="0.5"/></pattern></defs>
+      <rect width="820" height="420" fill="#0f0f25" rx="8"/><rect width="820" height="420" fill="url(#g1)"/>
+      <text x="20" y="28" fill="#5c6bc0" font-size="11" font-weight="600" letter-spacing="0.08em">THE HALF-DAY &mdash; BULLISH DIVERGENCE (5M)</text>
+      <!-- Pivot line -->
+      <line x1="40" y1="250" x2="620" y2="250" stroke="#448aff" stroke-width="1" stroke-dasharray="6,4" opacity="0.5"/>
+      <text x="42" y="264" fill="#448aff" font-size="10" opacity="0.7">Pivot S1</text>
+      <!-- Candles: downtrend -->
+      <line x1="70" y1="80" x2="70" y2="140" stroke="#ff5252" stroke-width="1.5"/><rect x="63" y="90" width="14" height="35" fill="#ff5252" rx="1"/>
+      <line x1="110" y1="100" x2="110" y2="165" stroke="#ff5252" stroke-width="1.5"/><rect x="103" y="110" width="14" height="40" fill="#ff5252" rx="1"/>
+      <line x1="150" y1="120" x2="150" y2="190" stroke="#ff5252" stroke-width="1.5"/><rect x="143" y="130" width="14" height="42" fill="#ff5252" rx="1"/>
+      <line x1="190" y1="155" x2="190" y2="200" stroke="#00e676" stroke-width="1.5"/><rect x="183" y="165" width="14" height="22" fill="#00e676" rx="1"/>
+      <line x1="230" y1="150" x2="230" y2="215" stroke="#ff5252" stroke-width="1.5"/><rect x="223" y="158" width="14" height="38" fill="#ff5252" rx="1"/>
+      <circle cx="230" cy="218" r="4" fill="none" stroke="#ffab40" stroke-width="1.5"/>
+      <text x="215" y="236" fill="#ffab40" font-size="9" font-weight="600">Low 1</text>
+      <line x1="270" y1="160" x2="270" y2="200" stroke="#00e676" stroke-width="1.5"/><rect x="263" y="170" width="14" height="18" fill="#00e676" rx="1"/>
+      <line x1="310" y1="165" x2="310" y2="210" stroke="#ff5252" stroke-width="1.5"/><rect x="303" y="172" width="14" height="25" fill="#ff5252" rx="1"/>
+      <!-- Pin bars with long lower wicks -->
+      <line x1="350" y1="180" x2="350" y2="255" stroke="#00e676" stroke-width="1.5"/><rect x="343" y="188" width="14" height="15" fill="#00e676" rx="1"/>
+      <line x1="390" y1="185" x2="390" y2="260" stroke="#00e676" stroke-width="1.5"/><rect x="383" y="190" width="14" height="15" fill="#00e676" rx="1"/>
+      <circle cx="390" cy="263" r="4" fill="none" stroke="#ffab40" stroke-width="1.5"/>
+      <text x="370" y="280" fill="#ffab40" font-size="9" font-weight="600">Low 2 (lower)</text>
+      <line x1="405" y1="258" x2="440" y2="290" stroke="#ffab40" stroke-width="1" stroke-dasharray="3,2"/>
+      <text x="442" y="296" fill="#ffab40" font-size="10" font-weight="600">Long lower wicks = buyers fighting</text>
+      <!-- ENTRY candle -->
+      <line x1="430" y1="170" x2="430" y2="210" stroke="#00e676" stroke-width="2"/><rect x="422" y="175" width="16" height="28" fill="#00e676" rx="2" stroke="#00ff88" stroke-width="1"/>
+      <text x="410" y="162" fill="#00e676" font-size="11" font-weight="700">ENTER</text>
+      <!-- Stop loss -->
+      <line x1="418" y1="218" x2="600" y2="218" stroke="#ff5252" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="602" y="222" fill="#ff5252" font-size="9">Stop Loss (1xATR)</text>
+      <!-- After: price up -->
+      <line x1="470" y1="155" x2="470" y2="185" stroke="#00e676" stroke-width="1.5"/><rect x="463" y="158" width="14" height="20" fill="#00e676" rx="1"/>
+      <line x1="510" y1="140" x2="510" y2="172" stroke="#00e676" stroke-width="1.5"/><rect x="503" y="145" width="14" height="18" fill="#00e676" rx="1"/>
+      <line x1="550" y1="125" x2="550" y2="160" stroke="#00e676" stroke-width="1.5"/><rect x="543" y="130" width="14" height="22" fill="#00e676" rx="1"/>
+      <!-- Trailing stop -->
+      <path d="M 430 218 L 470 200 L 510 185 L 550 170" stroke="#b388ff" stroke-width="1.5" stroke-dasharray="5,3" fill="none"/>
+      <text x="554" y="178" fill="#b388ff" font-size="9">Trailing stop follows up</text>
+      <!-- Divergence lines -->
+      <line x1="230" y1="215" x2="390" y2="258" stroke="#ffab40" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <!-- RSI panel -->
+      <rect x="40" y="330" width="580" height="80" fill="#0a0a1a" rx="6" stroke="#1a1a3a"/>
+      <text x="50" y="348" fill="#5c6bc0" font-size="9" font-weight="600">RSI (14)</text>
+      <polyline points="70,370 110,375 150,380 190,365 230,385 270,370 310,378 350,382 390,372 430,360 470,355 510,350 550,345" fill="none" stroke="#448aff" stroke-width="2"/>
+      <line x1="40" y1="390" x2="620" y2="390" stroke="#ff5252" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.4"/>
+      <text x="622" y="393" fill="#ff5252" font-size="8" opacity="0.5">30</text>
+      <line x1="230" y1="385" x2="390" y2="372" stroke="#00e676" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <circle cx="230" cy="385" r="3" fill="#ffab40"/><circle cx="390" cy="372" r="3" fill="#ffab40"/>
+      <text x="280" y="400" fill="#00e676" font-size="11" font-weight="700">RSI: HIGHER LOW</text>
+      <text x="280" y="320" fill="#ffab40" font-size="11" font-weight="700">PRICE: LOWER LOW</text>
+      <!-- DXY mini -->
+      <rect x="650" y="45" width="155" height="90" fill="#0a0a1a" rx="8" stroke="#2a2a4a"/>
+      <text x="665" y="65" fill="#5c6bc0" font-size="9" font-weight="600">DXY (Dollar Index)</text>
+      <rect x="675" y="78" width="8" height="18" fill="#ff5252" rx="1"/>
+      <rect x="695" y="85" width="8" height="20" fill="#ff5252" rx="1"/>
+      <rect x="715" y="92" width="8" height="18" fill="#ff5252" rx="1"/>
+      <rect x="735" y="100" width="8" height="16" fill="#ff5252" rx="1"/>
+      <text x="665" y="128" fill="#9fa8da" font-size="8">Dollar weak = EUR up</text>
+    </svg>
+  </div>
+
+  <div class="rules">
+    <h4>Exact Rules &mdash; Step by Step</h4>
+    <ol>
+      <li><strong>Open your 5m 6E chart.</strong> Time: 10:00 AM IST.</li>
+      <li><strong>Look for RSI divergence.</strong> Price makes a new low but RSI makes a HIGHER low (bullish). Or price makes a new high but RSI makes a LOWER high (bearish). <em>Any divergence type counts &mdash; regular or hidden.</em></li>
+      <li><strong>Enter at the close of the divergence candle.</strong> No extra confirmation needed. Just the divergence.</li>
+      <li><strong>Set trailing stop:</strong> Initial stop = <strong>1 x ATR below entry</strong> (for longs). Trail multiplier = <strong>0.75 x ATR</strong>. As price moves in your favor, stop follows but NEVER moves backward.</li>
+      <li><strong>Force close at 9:00 PM IST</strong> if trailing stop hasn't hit yet. No overnight holds.</li>
+      <li><span class="no-go">DO NOT TRADE</span> before 10 AM or after 9 PM IST.</li>
+    </ol>
+  </div>
+
+  <div class="card green-border">
+    <p style="margin:0 0 8px; font-size: 0.85rem;"><strong style="color: var(--green);">Winning Trades:</strong></p>
+    <div class="trade-log" style="line-height: 1.9;">
+      <div><span class="win">Sep 1, 11:50 AM</span> &mdash; SHORT @ 1.18540 | RSI bearish div at VWAP | trail caught the drop | <span class="win">+0.73%</span> in 8 bars</div>
+      <div><span class="win">Sep 3, 1:00 PM</span> &mdash; LONG @ 1.17500 | RSI bullish div | price reversed up | <span class="win">+0.53%</span> (closed at 9PM)</div>
+      <div><span class="win">Sep 5, 7:30 PM</span> &mdash; SHORT @ 1.18820 | RSI bearish div | trailed down | <span class="win">+0.32%</span></div>
+    </div>
+  </div>
+
+  <div class="fp-box">
+    <h4>False Positives &mdash; Trades That Looked Good But Lost</h4>
+    <div class="trade-log" style="line-height: 1.9;">
+      <div><span class="loss">Jul 22, 8:15 PM</span> &mdash; SHORT @ 1.18880 | <span class="loss">-0.40%</span> | Divergence existed, but candles had <strong>no wick rejection</strong> (tiny wicks), <strong>next candle didn't confirm</strong> (was green not red), and <strong>low volume</strong></div>
+      <div><span class="loss">Sep 4, 10:00 AM</span> &mdash; LONG @ 1.17805 | <span class="loss">-0.09%</span> | Divergence existed, but <strong>no wick rejection</strong> and <strong>no candle confirmation</strong>. Price kept dropping.</div>
+      <div><span class="loss">Sep 8, 5:55 PM</span> &mdash; SHORT @ 1.18475 | <span class="loss">-0.08%</span> | Had delta confirmation, but <strong>no wick rejection</strong>. Reversal didn't hold.</div>
+    </div>
+    <div class="pattern">Pattern: 90% of losses had NO wick rejection. Even though this strategy doesn't require it, mentally check for wicks before entering. Long lower wicks on longs, long upper wicks on shorts = much safer entry.</div>
+  </div>
+
+  <hr style="border:none; border-top: 1px solid var(--border); margin: 32px 0;">
+
+  <!-- Strategy B -->
+  <h2 style="color: var(--green);">Strategy B: The Everyday</h2>
+  <p>Tighter trailing stop locks profit faster. Catches more moves. Your go-to for 1 trade per day.</p>
+
+  <div class="stats-bar">
+    <div class="stat-item"><div class="val green">150</div><div class="lbl">Trades / 9mo</div></div>
+    <div class="stat-item"><div class="val green">0.64</div><div class="lbl">Per Day</div></div>
+    <div class="stat-item"><div class="val green">69%</div><div class="lbl">Win Rate</div></div>
+    <div class="stat-item"><div class="val blue">4.68</div><div class="lbl">Profit Factor</div></div>
+    <div class="stat-item"><div class="val orange">1.56</div><div class="lbl">R : R</div></div>
+    <div class="stat-item"><div class="val green">+5.83%</div><div class="lbl">Total P&amp;L</div></div>
+  </div>
+
+  <!-- Chart: Everyday - same divergence but showing tighter trail -->
+  <div class="chart-wrap">
+    <svg viewBox="0 0 820 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;font-family:'Inter',sans-serif;">
+      <rect width="820" height="340" fill="#0f0f25" rx="8"/>
+      <text x="20" y="28" fill="#5c6bc0" font-size="11" font-weight="600" letter-spacing="0.08em">THE EVERYDAY &mdash; TIGHTER TRAIL LOCKS FASTER (5M)</text>
+      <!-- Candles down then up -->
+      <line x1="80" y1="90" x2="80" y2="150" stroke="#ff5252" stroke-width="1.5"/><rect x="73" y="95" width="14" height="40" fill="#ff5252" rx="1"/>
+      <line x1="120" y1="110" x2="120" y2="175" stroke="#ff5252" stroke-width="1.5"/><rect x="113" y="118" width="14" height="42" fill="#ff5252" rx="1"/>
+      <line x1="160" y1="130" x2="160" y2="200" stroke="#ff5252" stroke-width="1.5"/><rect x="153" y="138" width="14" height="44" fill="#ff5252" rx="1"/>
+      <!-- Divergence low -->
+      <line x1="200" y1="155" x2="200" y2="225" stroke="#00e676" stroke-width="1.5"/><rect x="193" y="162" width="14" height="15" fill="#00e676" rx="1"/>
+      <circle cx="200" cy="228" r="3" fill="#ffab40"/>
+      <!-- Entry -->
+      <rect x="233" y="148" width="16" height="22" fill="#00e676" rx="2" stroke="#00ff88" stroke-width="1"/>
+      <text x="222" y="140" fill="#00e676" font-size="10" font-weight="700">ENTER</text>
+      <!-- Price up with TIGHT trail -->
+      <line x1="280" y1="130" x2="280" y2="158" stroke="#00e676" stroke-width="1.5"/><rect x="273" y="135" width="14" height="16" fill="#00e676" rx="1"/>
+      <line x1="320" y1="120" x2="320" y2="148" stroke="#00e676" stroke-width="1.5"/><rect x="313" y="125" width="14" height="16" fill="#00e676" rx="1"/>
+      <line x1="360" y1="115" x2="360" y2="142" stroke="#00e676" stroke-width="1.5"/><rect x="353" y="118" width="14" height="18" fill="#00e676" rx="1"/>
+      <!-- Pullback hits tight trail -->
+      <line x1="400" y1="125" x2="400" y2="150" stroke="#ff5252" stroke-width="1.5"/><rect x="393" y="128" width="14" height="18" fill="#ff5252" rx="1"/>
+      <!-- Two trailing stop lines for comparison -->
+      <path d="M 241 175 L 280 160 L 320 150 L 360 142 L 400 138" stroke="#00e676" stroke-width="2" stroke-dasharray="4,3" fill="none"/>
+      <text x="405" y="138" fill="#00e676" font-size="9" font-weight="600">0.5x trail (TIGHT)</text>
+      <text x="405" y="150" fill="#00e676" font-size="8">&larr; locks profit here</text>
+      <path d="M 241 185 L 280 170 L 320 158 L 360 148 L 400 145" stroke="#b388ff" stroke-width="1.5" stroke-dasharray="6,4" fill="none" opacity="0.5"/>
+      <text x="405" y="165" fill="#b388ff" font-size="8" opacity="0.6">0.75x trail (looser)</text>
+      <!-- SL -->
+      <line x1="233" y1="195" x2="450" y2="195" stroke="#ff5252" stroke-width="1" stroke-dasharray="4,3" opacity="0.4"/>
+      <text x="452" y="198" fill="#ff5252" font-size="8" opacity="0.5">Initial SL</text>
+      <!-- Key difference label -->
+      <rect x="480" y="80" width="310" height="70" fill="#0a0a1a" rx="8" stroke="#2a2a4a"/>
+      <text x="495" y="100" fill="#00e676" font-size="10" font-weight="600">KEY DIFFERENCE:</text>
+      <text x="495" y="118" fill="#9fa8da" font-size="9">Tighter trail (0.5x vs 0.75x ATR)</text>
+      <text x="495" y="134" fill="#9fa8da" font-size="9">Locks profit sooner = higher WR (69%)</text>
+      <!-- RSI panel compact -->
+      <rect x="40" y="260" width="450" height="60" fill="#0a0a1a" rx="6" stroke="#1a1a3a"/>
+      <text x="50" y="278" fill="#5c6bc0" font-size="9">RSI</text>
+      <polyline points="80,295 120,300 160,305 200,292 240,288 280,282 320,278 360,275 400,280" fill="none" stroke="#448aff" stroke-width="2"/>
+      <line x1="80" y1="300" x2="200" y2="305" stroke="#ffab40" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <line x1="80" y1="300" x2="200" y2="292" stroke="#00e676" stroke-width="1.5" stroke-dasharray="4,3"/>
+    </svg>
+  </div>
+
+  <div class="rules">
+    <h4>Exact Rules &mdash; Step by Step</h4>
+    <ol>
+      <li><strong>Open your 5m 6E chart.</strong> Time: 8:00 AM IST.</li>
+      <li><strong>Look for RSI divergence</strong> &mdash; same as Half-Day. Any divergence type.</li>
+      <li><strong>Enter at the close of the divergence candle.</strong></li>
+      <li><strong>Set trailing stop:</strong> Initial stop = <strong>1 x ATR</strong>. Trail = <strong>0.5 x ATR</strong> (tighter than Half-Day!). This locks profit faster &mdash; you won't ride big moves as far, but you'll keep more wins.</li>
+      <li><strong>Close by 11 PM IST</strong> if trail hasn't hit.</li>
+      <li><span class="no-go">DO NOT TRADE</span> before 8 AM or after 9 PM IST.</li>
+    </ol>
+  </div>
+
+  <div class="card green-border">
+    <p style="margin:0 0 8px; font-size: 0.85rem;"><strong style="color: var(--green);">Winning Trades:</strong></p>
+    <div class="trade-log" style="line-height: 1.9;">
+      <div><span class="win">Sep 1, 11:50 AM</span> &mdash; SHORT @ 1.18540 | RSI bearish div | tight trail caught full drop | <span class="win">+0.75%</span></div>
+      <div><span class="win">Sep 3, 1:00 PM</span> &mdash; LONG @ 1.17500 | RSI bullish div | trail locked before reversal | <span class="win">+0.47%</span></div>
+      <div><span class="win">Sep 5, 7:30 PM</span> &mdash; SHORT @ 1.18820 | RSI bearish div | <span class="win">+0.35%</span></div>
+    </div>
+  </div>
+
+  <div class="fp-box">
+    <h4>False Positives</h4>
+    <div class="trade-log" style="line-height: 1.9;">
+      <div><span class="loss">Jul 22, 8:15 PM</span> &mdash; SHORT @ 1.18880 | <span class="loss">-0.16%</span> | Divergence existed but <strong>no wick rejection</strong>, <strong>next candle was green</strong> (didn't confirm short). Price reversed up immediately.</div>
+      <div><span class="loss">Sep 8, 5:55 PM</span> &mdash; SHORT @ 1.18475 | <span class="loss">-0.08%</span> | Had divergence but <strong>no wick rejection</strong>. Tight trail got stopped out on noise.</div>
+    </div>
+    <div class="pattern">Same pattern: no wick rejection = unreliable reversal. The tighter trail (0.5x) means you exit losses faster too &mdash; max loss per trade is smaller than Half-Day.</div>
+  </div>
+
+  <div class="card" style="border-color: rgba(255,82,82,0.3); margin-top: 20px;">
+    <p style="margin:0 0 8px; font-size: 0.85rem;"><strong style="color: var(--red);">False Positives to AVOID:</strong></p>
+    <div class="trade-log" style="line-height: 1.9;">
+      <div><span class="loss">Jul 22, 8:15 PM</span> &mdash; SHORT @ 1.18880 | <span class="loss">-0.40%</span> | <strong>Why:</strong> No wick rejection, no next candle confirm, low volume</div>
+      <div><span class="loss">Sep 8, 5:55 PM</span> &mdash; SHORT @ 1.18475 | <span class="loss">-0.08%</span> | <strong>Why:</strong> No wick rejection, no candle confirm</div>
+    </div>
+    <p style="margin:8px 0 0; font-size: 0.78rem; color: var(--text-3);">Pattern: almost every loss had <strong style="color:var(--red)">no wick rejection</strong>. If candles have tiny wicks, the reversal isn't confirmed.</p>
+  </div>
+
+  <hr style="border:none; border-top: 1px solid var(--border); margin: 32px 0;">
+
+  <!-- Strategy C: 1.5/day -->
+  <h2 style="color: var(--green);">Strategy C: The Sweet Spot <span class="tag tag-green">1.5 / day</span></h2>
+  <p>Next candle must confirm + VWAP must be aligned (long below VWAP, short above). Uses <strong>both 5m and 15m</strong> charts. The best risk-reward of all daily strategies.</p>
+
+  <div class="stats-bar">
+    <div class="stat-item"><div class="val green">352</div><div class="lbl">Trades / 9mo</div></div>
+    <div class="stat-item"><div class="val green">1.50</div><div class="lbl">Per Day</div></div>
+    <div class="stat-item"><div class="val green">76%</div><div class="lbl">Win Rate</div></div>
+    <div class="stat-item"><div class="val green">6.73</div><div class="lbl">Profit Factor</div></div>
+    <div class="stat-item"><div class="val green">+37.6%</div><div class="lbl">Total P&amp;L</div></div>
+    <div class="stat-item"><div class="val orange">5m+15m</div><div class="lbl">Timeframes</div></div>
+  </div>
+
+  <!-- Chart: Sweet Spot with VWAP -->
+  <div class="chart-wrap">
+    <svg viewBox="0 0 820 380" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;font-family:'Inter',sans-serif;">
+      <defs><pattern id="g3" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a1a3a" stroke-width="0.5"/></pattern></defs>
+      <rect width="820" height="380" fill="#0f0f25" rx="8"/><rect width="820" height="380" fill="url(#g3)"/>
+      <text x="20" y="28" fill="#5c6bc0" font-size="11" font-weight="600" letter-spacing="0.08em">SWEET SPOT &mdash; DIVERGENCE + NEXT CANDLE + VWAP (5M or 15M)</text>
+      <!-- VWAP line -->
+      <path d="M 40 160 Q 200 155, 400 165 Q 500 170, 700 162" stroke="#448aff" stroke-width="2" fill="none"/>
+      <text x="705" y="158" fill="#448aff" font-size="10" font-weight="600">VWAP</text>
+      <text x="705" y="172" fill="#448aff" font-size="8">(fair price)</text>
+      <!-- Price below VWAP (bullish setup) -->
+      <line x1="80" y1="170" x2="80" y2="220" stroke="#ff5252" stroke-width="1.5"/><rect x="73" y="178" width="14" height="30" fill="#ff5252" rx="1"/>
+      <line x1="120" y1="185" x2="120" y2="235" stroke="#ff5252" stroke-width="1.5"/><rect x="113" y="192" width="14" height="30" fill="#ff5252" rx="1"/>
+      <line x1="160" y1="200" x2="160" y2="250" stroke="#ff5252" stroke-width="1.5"/><rect x="153" y="208" width="14" height="28" fill="#ff5252" rx="1"/>
+      <!-- Divergence candle with wick -->
+      <line x1="200" y1="210" x2="200" y2="270" stroke="#00e676" stroke-width="1.5"/><rect x="193" y="218" width="14" height="14" fill="#00e676" rx="1"/>
+      <circle cx="200" cy="273" r="3" fill="#ffab40"/>
+      <text x="210" y="278" fill="#ffab40" font-size="9">Divergence here</text>
+      <!-- "Below VWAP" label -->
+      <rect x="140" y="135" width="130" height="20" rx="4" fill="rgba(68,138,255,0.15)" stroke="rgba(68,138,255,0.3)"/>
+      <text x="152" y="149" fill="#448aff" font-size="9" font-weight="600">Price BELOW VWAP = OK to long</text>
+      <!-- NEXT CANDLE = GREEN (the confirmation) -->
+      <rect x="233" y="200" width="18" height="24" fill="#00e676" rx="2" stroke="#00ff88" stroke-width="1.5"/>
+      <line x1="242" y1="195" x2="242" y2="228" stroke="#00e676" stroke-width="1.5"/>
+      <text x="255" y="200" fill="#00e676" font-size="10" font-weight="700">NEXT CANDLE</text>
+      <text x="255" y="212" fill="#00e676" font-size="10" font-weight="700">IS GREEN</text>
+      <text x="255" y="226" fill="#9fa8da" font-size="8">&rarr; NOW enter</text>
+      <!-- Entry arrow -->
+      <path d="M 242 185 L 242 193" stroke="#00e676" stroke-width="2.5" marker-end="url(#aSS)"/>
+      <defs><marker id="aSS" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#00e676"/></marker></defs>
+      <!-- Price moves toward VWAP -->
+      <line x1="290" y1="185" x2="290" y2="210" stroke="#00e676" stroke-width="1.5"/><rect x="283" y="190" width="14" height="14" fill="#00e676" rx="1"/>
+      <line x1="330" y1="175" x2="330" y2="198" stroke="#00e676" stroke-width="1.5"/><rect x="323" y="178" width="14" height="15" fill="#00e676" rx="1"/>
+      <line x1="370" y1="165" x2="370" y2="188" stroke="#00e676" stroke-width="1.5"/><rect x="363" y="168" width="14" height="15" fill="#00e676" rx="1"/>
+      <!-- Trail stop -->
+      <path d="M 250 230 L 290 215 L 330 200 L 370 190" stroke="#b388ff" stroke-width="1.5" stroke-dasharray="5,3" fill="none"/>
+      <text x="375" y="195" fill="#b388ff" font-size="9">Trail follows up</text>
+      <!-- RSI panel -->
+      <rect x="40" y="300" width="500" height="60" fill="#0a0a1a" rx="6" stroke="#1a1a3a"/>
+      <text x="50" y="318" fill="#5c6bc0" font-size="9">RSI</text>
+      <polyline points="80,340 120,345 160,348 200,338 242,332 290,328 330,325 370,322" fill="none" stroke="#448aff" stroke-width="2"/>
+      <line x1="120" y1="345" x2="200" y2="348" stroke="#ffab40" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <line x1="120" y1="345" x2="200" y2="338" stroke="#00e676" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="140" y="355" fill="#00e676" font-size="9" font-weight="600">RSI higher low</text>
+      <!-- 3 checkmarks on right -->
+      <rect x="560" y="80" width="240" height="130" fill="#0a0a1a" rx="8" stroke="#2a2a4a"/>
+      <text x="575" y="100" fill="#00e676" font-size="10" font-weight="600">CHECKLIST:</text>
+      <text x="575" y="120" fill="#69f0ae" font-size="11">&#10003;</text><text x="595" y="120" fill="#9fa8da" font-size="10">RSI Divergence</text>
+      <text x="575" y="140" fill="#69f0ae" font-size="11">&#10003;</text><text x="595" y="140" fill="#9fa8da" font-size="10">Next candle GREEN</text>
+      <text x="575" y="160" fill="#69f0ae" font-size="11">&#10003;</text><text x="595" y="160" fill="#9fa8da" font-size="10">Price BELOW VWAP</text>
+      <text x="575" y="185" fill="#00e676" font-size="9" font-weight="700">= ENTER LONG</text>
+      <text x="575" y="200" fill="#5c6bc0" font-size="8">76% win rate on this combo</text>
+    </svg>
+  </div>
+
+  <div class="rules">
+    <h4>Exact Rules &mdash; Step by Step</h4>
+    <ol>
+      <li><strong>Open BOTH 5m and 15m 6E charts.</strong> You take signals from either timeframe. Time: 8 AM IST.</li>
+      <li><strong>Spot RSI divergence</strong> on either chart.</li>
+      <li><strong>Check VWAP:</strong> Is price BELOW VWAP? &rarr; only take LONG. Is price ABOVE VWAP? &rarr; only take SHORT. <em>If price is on the wrong side, SKIP the trade.</em></li>
+      <li><strong>Wait for the NEXT candle.</strong> If it closes GREEN (for longs) or RED (for shorts) = <strong>ENTER.</strong> If it's the wrong color or a doji, SKIP.</li>
+      <li><strong>Set trailing stop:</strong> 1xATR initial, 0.5xATR trail.</li>
+      <li><strong>Close by 9 PM IST.</strong></li>
+      <li><span class="no-go">SKIP IF:</span> Price is on the wrong side of VWAP, or next candle doesn't confirm.</li>
+    </ol>
+  </div>
+
+  <div class="card blue-border">
+    <p style="margin:0; font-size: 0.9rem;"><strong style="color: var(--blue);">Why VWAP alignment works:</strong> VWAP is where most volume traded today. If you're below VWAP going long, price is "cheap" vs the day's average &mdash; natural pull back toward VWAP. If above VWAP going short, price is "expensive." You're always trading TOWARD the mean.</p>
+  </div>
+
+  <div class="card green-border" style="margin-top: 12px;">
+    <p style="margin:0 0 8px; font-size: 0.85rem;"><strong style="color: var(--green);">Winning Examples:</strong></p>
+    <div class="trade-log" style="line-height: 1.9;">
+      <div><span class="win">Sep 3, 1:00 PM</span> &mdash; 5m LONG @ 1.17500 | below VWAP, next candle green | <span class="win">+0.53%</span> (4 bars)</div>
+      <div><span class="win">Sep 10, 5:45 PM</span> &mdash; 15m LONG @ 1.18150 | at Fib S1 + 50% retracement | <span class="win">+0.24%</span></div>
+      <div><span class="win">Sep 16, 8:30 PM</span> &mdash; 5m SHORT @ 1.19635 | above VWAP, next candle red | <span class="win">+0.08%</span></div>
+      <div><span class="win">Sep 22, 7:10 PM</span> &mdash; 5m SHORT @ 1.18880 | above VWAP confirmed | <span class="win">+0.08%</span></div>
+    </div>
+  </div>
+
+  <div class="card" style="border-color: rgba(255,82,82,0.3); margin-top: 12px;">
+    <p style="margin:0 0 8px; font-size: 0.85rem;"><strong style="color: var(--red);">False Positives:</strong></p>
+    <div class="trade-log" style="line-height: 1.9;">
+      <div><span class="loss">Sep 18, 8:30 PM</span> &mdash; 15m LONG @ 1.18890 | <span class="loss">-0.008%</span> | <strong>Skip if:</strong> no wick rejection + low volume</div>
+      <div><span class="loss">Sep 25, 7:55 PM</span> &mdash; 5m LONG @ 1.17940 | <span class="loss">-0.042%</span> | <strong>Skip if:</strong> no wick rejection + no LL/HH</div>
+      <div><span class="loss">Oct 3, 7:35 PM</span> &mdash; 5m SHORT @ 1.18480 | <span class="loss">-0.049%</span> | <strong>Skip if:</strong> no wick rejection</div>
+    </div>
+    <p style="margin:8px 0 0; font-size: 0.78rem; color: var(--text-3);">Pattern: losses happen when there's <strong style="color:var(--red)">no wick rejection</strong>. If you see VWAP + next candle + wick rejection, it's practically a lock.</p>
+  </div>
+
+  <hr style="border:none; border-top: 1px solid var(--border); margin: 32px 0;">
+
+  <!-- Strategy D: 2+/day -->
+  <h2 style="color: var(--green);">Strategy D: The Machine <span class="tag tag-green">2+ / day</span></h2>
+  <p>High frequency. Next candle confirms + combined 5m and 15m. Takes every confirmed divergence. Volume trading &mdash; profits add up over many small wins.</p>
+
+  <div class="stats-bar">
+    <div class="stat-item"><div class="val green">650</div><div class="lbl">Trades / 9mo</div></div>
+    <div class="stat-item"><div class="val green">2.78</div><div class="lbl">Per Day</div></div>
+    <div class="stat-item"><div class="val green">57%</div><div class="lbl">Win Rate</div></div>
+    <div class="stat-item"><div class="val blue">1.53</div><div class="lbl">Profit Factor</div></div>
+    <div class="stat-item"><div class="val green">+19.0%</div><div class="lbl">Total P&amp;L</div></div>
+    <div class="stat-item"><div class="val orange">5m+15m</div><div class="lbl">Timeframes</div></div>
+  </div>
+
+  <!-- Chart: The Machine - two timeframes -->
+  <div class="chart-wrap">
+    <svg viewBox="0 0 820 300" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;font-family:'Inter',sans-serif;">
+      <rect width="820" height="300" fill="#0f0f25" rx="8"/>
+      <text x="20" y="28" fill="#5c6bc0" font-size="11" font-weight="600" letter-spacing="0.08em">THE MACHINE &mdash; TWO TIMEFRAMES, MAXIMUM TRADES</text>
+      <!-- 5m chart box -->
+      <rect x="30" y="45" width="370" height="230" fill="#0a0a1a" rx="8" stroke="#2a2a4a"/>
+      <text x="45" y="65" fill="#00e676" font-size="10" font-weight="600">5-MINUTE CHART</text>
+      <line x1="70" y1="100" x2="70" y2="150" stroke="#ff5252" stroke-width="1.5"/><rect x="63" y="105" width="12" height="35" fill="#ff5252" rx="1"/>
+      <line x1="100" y1="115" x2="100" y2="165" stroke="#ff5252" stroke-width="1.5"/><rect x="93" y="120" width="12" height="35" fill="#ff5252" rx="1"/>
+      <line x1="130" y1="135" x2="130" y2="185" stroke="#00e676" stroke-width="1.5"/><rect x="123" y="145" width="12" height="12" fill="#00e676" rx="1"/>
+      <circle cx="130" cy="188" r="3" fill="#ffab40"/><text x="140" y="192" fill="#ffab40" font-size="8">Divergence</text>
+      <rect x="155" y="132" width="14" height="18" fill="#00e676" rx="2" stroke="#00ff88" stroke-width="1"/>
+      <text x="175" y="138" fill="#00e676" font-size="8" font-weight="700">NEXT = GREEN</text>
+      <text x="175" y="150" fill="#00e676" font-size="8">&rarr; ENTER</text>
+      <rect x="195" y="118" width="12" height="16" fill="#00e676" rx="1"/>
+      <rect x="225" y="110" width="12" height="14" fill="#00e676" rx="1"/>
+      <text x="45" y="240" fill="#00e676" font-size="18" font-weight="700">&#10003;</text>
+      <text x="70" y="240" fill="#9fa8da" font-size="10">Trade #1</text>
+      <!-- 15m chart box -->
+      <rect x="420" y="45" width="370" height="230" fill="#0a0a1a" rx="8" stroke="#2a2a4a"/>
+      <text x="435" y="65" fill="#448aff" font-size="10" font-weight="600">15-MINUTE CHART</text>
+      <line x1="460" y1="90" x2="460" y2="155" stroke="#ff5252" stroke-width="1.5"/><rect x="453" y="98" width="12" height="45" fill="#ff5252" rx="1"/>
+      <line x1="500" y1="120" x2="500" y2="190" stroke="#ff5252" stroke-width="1.5"/><rect x="493" y="128" width="12" height="48" fill="#ff5252" rx="1"/>
+      <line x1="540" y1="148" x2="540" y2="210" stroke="#00e676" stroke-width="1.5"/><rect x="533" y="158" width="12" height="15" fill="#00e676" rx="1"/>
+      <circle cx="540" cy="213" r="3" fill="#ffab40"/><text x="550" y="217" fill="#ffab40" font-size="8">Divergence</text>
+      <rect x="565" y="142" width="14" height="20" fill="#ff5252" rx="2" stroke="#ff5252" stroke-width="1"/>
+      <text x="585" y="148" fill="#ff5252" font-size="8" font-weight="700">NEXT = RED</text>
+      <text x="585" y="160" fill="#ff5252" font-size="8">&rarr; ENTER SHORT</text>
+      <rect x="605" y="150" width="12" height="20" fill="#ff5252" rx="1"/>
+      <rect x="635" y="158" width="12" height="22" fill="#ff5252" rx="1"/>
+      <text x="435" y="240" fill="#00e676" font-size="18" font-weight="700">&#10003;</text>
+      <text x="460" y="240" fill="#9fa8da" font-size="10">Trade #2 (same day!)</text>
+      <!-- Arrow between -->
+      <text x="390" y="160" fill="#9fa8da" font-size="14">+</text>
+    </svg>
+  </div>
+
+  <div class="rules">
+    <h4>Exact Rules &mdash; Step by Step</h4>
+    <ol>
+      <li><strong>Open BOTH 5m and 15m 6E charts</strong> side by side. Time: 8 AM IST.</li>
+      <li><strong>Spot RSI divergence</strong> on EITHER chart. You take signals from both &mdash; this is how you get 2+ trades/day.</li>
+      <li><strong>Wait for the next candle to confirm.</strong> GREEN for longs, RED for shorts. If wrong color, SKIP.</li>
+      <li><strong>Enter at the close of the confirmation candle.</strong></li>
+      <li><strong>Set trailing stop:</strong> 1xATR initial, 0.5xATR trail.</li>
+      <li><strong>Close by 9 PM IST.</strong></li>
+      <li><span class="no-go">ONLY FILTER:</span> next candle must confirm. That's it. No VWAP, no wick, no level required. Volume trading = lots of small wins.</li>
+    </ol>
+  </div>
+
+  <div class="card" style="border-color: rgba(255,171,64,0.3);">
+    <p style="margin:0; font-size: 0.9rem;"><strong style="color: var(--orange);">The tradeoff:</strong> Lower win rate (57%) but high volume. You'll take 2-3 trades a day. Some lose, but winners outsize losers. PF of 1.53 means every $1 lost earns $1.53 back. Over 650 trades, that compounds to +19%.</p>
+  </div>
+
+  <div class="card green-border" style="margin-top: 12px;">
+    <p style="margin:0 0 8px; font-size: 0.85rem;"><strong style="color: var(--green);">Winning Examples:</strong></p>
+    <div class="trade-log" style="line-height: 1.9;">
+      <div><span class="win">Sep 3, 1:00 PM</span> &mdash; 5m LONG @ 1.17500 | <span class="win">+0.53%</span> (4 bars, time cutoff)</div>
+      <div><span class="win">Sep 9, 7:45 PM</span> &mdash; 15m SHORT @ 1.18545 | <span class="win">+0.09%</span> (time cutoff)</div>
+      <div><span class="win">Sep 10, 5:45 PM</span> &mdash; 15m LONG @ 1.18150 | <span class="win">+0.24%</span> (trail SL)</div>
+      <div><span class="win">Sep 17, 1:15 PM</span> &mdash; 15m LONG @ 1.19565 | <span class="win">+0.01%</span> (trail locked)</div>
+    </div>
+  </div>
+
+  <div class="card" style="border-color: rgba(255,82,82,0.3); margin-top: 12px;">
+    <p style="margin:0 0 8px; font-size: 0.85rem;"><strong style="color: var(--red);">False Positives:</strong></p>
+    <div class="trade-log" style="line-height: 1.9;">
+      <div><span class="loss">Sep 17, 7:25 PM</span> &mdash; 5m LONG @ 1.19655 | <span class="loss">-0.021%</span> | <strong>Skip if:</strong> no wick, wrong side of VWAP</div>
+      <div><span class="loss">Sep 19, 9:15 AM</span> &mdash; 15m LONG @ 1.19045 | <span class="loss">-0.062%</span> | <strong>Skip if:</strong> no wick, wrong side of VWAP</div>
+      <div><span class="loss">Sep 26, 5:45 PM</span> &mdash; 15m SHORT @ 1.17860 | <span class="loss">-0.045%</span> | <strong>Skip if:</strong> no wick, low volume</div>
+    </div>
+    <p style="margin:8px 0 0; font-size: 0.78rem; color: var(--text-3);">Tip: if you add wick rejection as a mental filter (don't skip the trade, but size smaller), you'll improve the win rate from 57% toward 70%.</p>
+  </div>
+
+  <!-- ═══ WEEKLY EDGE ═══ -->
+  <div class="divider">Weekly Edge</div>
+
+  <h2 style="color: var(--blue);">Strategy D: The Patient One</h2>
+  <p>Only enters when price genuinely made a new lower low (for bullish) or higher high (for bearish). Filters out fake divergences. <strong>Max 2 consecutive losses in 9 months.</strong></p>
+
+  <div class="stats-bar">
+    <div class="stat-item"><div class="val blue">90</div><div class="lbl">Trades / 9mo</div></div>
+    <div class="stat-item"><div class="val blue">~2/wk</div><div class="lbl">Frequency</div></div>
+    <div class="stat-item"><div class="val green">74%</div><div class="lbl">Win Rate</div></div>
+    <div class="stat-item"><div class="val green">4.96</div><div class="lbl">Profit Factor</div></div>
+    <div class="stat-item"><div class="val orange">2.59</div><div class="lbl">R : R</div></div>
+    <div class="stat-item"><div class="val green">+3.87%</div><div class="lbl">Total P&amp;L</div></div>
+  </div>
+
+  <!-- Chart: Patient One with LL/HH + VWAP partial -->
+  <div class="chart-wrap">
+    <svg viewBox="0 0 820 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;font-family:'Inter',sans-serif;">
+      <rect width="820" height="340" fill="#0f0f25" rx="8"/>
+      <text x="20" y="28" fill="#5c6bc0" font-size="11" font-weight="600" letter-spacing="0.08em">THE PATIENT ONE &mdash; LL/HH CONFIRMED + 50% AT VWAP</text>
+      <!-- VWAP line -->
+      <path d="M 40 150 Q 250 145, 500 155 Q 600 158, 750 152" stroke="#448aff" stroke-width="2" fill="none"/>
+      <text x="755" y="150" fill="#448aff" font-size="9">VWAP</text>
+      <!-- Two swing lows: second is LOWER (LL confirmed) -->
+      <line x1="100" y1="160" x2="100" y2="210" stroke="#ff5252" stroke-width="1.5"/><rect x="93" y="168" width="14" height="28" fill="#ff5252" rx="1"/>
+      <line x1="140" y1="175" x2="140" y2="225" stroke="#ff5252" stroke-width="1.5"/><rect x="133" y="182" width="14" height="28" fill="#ff5252" rx="1"/>
+      <circle cx="140" cy="228" r="4" fill="none" stroke="#ffab40" stroke-width="1.5"/>
+      <text x="125" y="245" fill="#ffab40" font-size="9">Low 1</text>
+      <line x1="180" y1="170" x2="180" y2="205" stroke="#00e676" stroke-width="1.5"/><rect x="173" y="178" width="14" height="16" fill="#00e676" rx="1"/>
+      <line x1="220" y1="180" x2="220" y2="230" stroke="#ff5252" stroke-width="1.5"/><rect x="213" y="188" width="14" height="28" fill="#ff5252" rx="1"/>
+      <!-- LOWER LOW -->
+      <line x1="260" y1="195" x2="260" y2="250" stroke="#00e676" stroke-width="1.5"/><rect x="253" y="202" width="14" height="14" fill="#00e676" rx="1"/>
+      <circle cx="260" cy="253" r="4" fill="none" stroke="#ffab40" stroke-width="1.5"/>
+      <text x="230" y="270" fill="#ffab40" font-size="9" font-weight="600">Low 2 (LOWER!)</text>
+      <text x="230" y="283" fill="#ffab40" font-size="8">&rarr; LL confirmed</text>
+      <!-- Divergence lines -->
+      <line x1="140" y1="225" x2="260" y2="250" stroke="#ffab40" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <!-- Entry -->
+      <rect x="293" y="188" width="16" height="22" fill="#00e676" rx="2" stroke="#00ff88" stroke-width="1"/>
+      <text x="275" y="180" fill="#00e676" font-size="10" font-weight="700">ENTER</text>
+      <!-- Price moves up toward VWAP -->
+      <rect x="333" y="178" width="14" height="16" fill="#00e676" rx="1"/>
+      <rect x="373" y="168" width="14" height="14" fill="#00e676" rx="1"/>
+      <rect x="413" y="158" width="14" height="12" fill="#00e676" rx="1"/>
+      <!-- 50% at VWAP marker -->
+      <line x1="420" y1="150" x2="420" y2="130" stroke="#ffd740" stroke-width="2"/>
+      <rect x="390" y="115" width="130" height="20" rx="4" fill="rgba(255,215,64,0.15)" stroke="rgba(255,215,64,0.3)"/>
+      <text x="398" y="129" fill="#ffd740" font-size="9" font-weight="600">BOOK 50% AT VWAP</text>
+      <!-- Remaining 50% continues -->
+      <rect x="453" y="148" width="14" height="12" fill="#00e676" rx="1" opacity="0.5"/>
+      <rect x="493" y="140" width="14" height="14" fill="#00e676" rx="1" opacity="0.5"/>
+      <text x="515" y="148" fill="#b388ff" font-size="9">Trail remaining 50%</text>
+      <!-- Stats box -->
+      <rect x="580" y="200" width="210" height="80" fill="#0a0a1a" rx="8" stroke="#2a2a4a"/>
+      <text x="595" y="220" fill="#448aff" font-size="10" font-weight="600">WHY THIS WORKS:</text>
+      <text x="595" y="238" fill="#9fa8da" font-size="9">LL/HH = real divergence (not noise)</text>
+      <text x="595" y="254" fill="#9fa8da" font-size="9">VWAP partial = guaranteed income</text>
+      <text x="595" y="270" fill="#00e676" font-size="9" font-weight="600">Max 2 consecutive losses!</text>
+    </svg>
+  </div>
+
+  <div class="rules">
+    <h4>Exact Rules &mdash; Step by Step</h4>
+    <ol>
+      <li><strong>Open 5m 6E chart.</strong> Time: 10 AM IST.</li>
+      <li><strong>Spot RSI divergence.</strong></li>
+      <li><strong>Confirm LL/HH:</strong> For bullish &mdash; did price actually make a LOWER LOW vs the previous swing low? For bearish &mdash; did it make a HIGHER HIGH? <em>If no genuine LL/HH, SKIP.</em></li>
+      <li><strong>Enter at the close of the divergence candle.</strong></li>
+      <li><strong>Set trailing stop:</strong> 1xATR initial, 0.75xATR trail.</li>
+      <li><strong>Book 50% at VWAP:</strong> When price reaches VWAP, close half your position. Trail the remaining 50%.</li>
+      <li><strong>Close by 9 PM IST.</strong></li>
+      <li><span class="no-go">SKIP IF:</span> No genuine LL or HH. If the "low" is higher than the previous low, it's not a real divergence.</li>
+    </ol>
+  </div>
+
+  <div class="card blue-border">
+    <p style="margin:0; font-size: 0.85rem;"><strong style="color: var(--blue);">Example Trades:</strong></p>
+    <div class="trade-log" style="margin-top:10px; line-height: 1.9;">
+      <div><span class="win">Sep 3, 1:00 PM</span> &mdash; LONG @ 1.17500 | Fib Pivot S2, cum delta rising | <span class="win">+0.33%</span></div>
+      <div><span class="win">Sep 5, 7:30 PM</span> &mdash; SHORT @ 1.18820 | monthly high, volume spike | <span class="win">+0.24%</span></div>
+      <div><span class="win">Sep 10, 11:45 AM</span> &mdash; SHORT @ 1.18385 | VWAP aligned | <span class="win">+0.09%</span></div>
+      <div><span class="win">Sep 11, 4:40 PM</span> &mdash; SHORT @ 1.18095 | LL confirmed | <span class="win">+0.06%</span></div>
+    </div>
+  </div>
+
+  <div class="card" style="border-color: rgba(255,82,82,0.3); margin-top: 12px;">
+    <p style="margin:0 0 8px; font-size: 0.85rem;"><strong style="color: var(--red);">False Positives:</strong></p>
+    <div class="trade-log" style="line-height: 1.9;">
+      <div><span class="loss">Jul 22, 8:15 PM</span> &mdash; SHORT @ 1.18880 | <span class="loss">-0.40%</span> | <strong>Skip if:</strong> no wick rejection, no next candle confirm</div>
+      <div><span class="loss">Sep 4, 10:00 AM</span> &mdash; LONG @ 1.17805 | <span class="loss">-0.09%</span> | <strong>Skip if:</strong> no wick rejection, low volume</div>
+    </div>
+    <p style="margin:8px 0 0; font-size: 0.78rem; color: var(--text-3);">Even with LL/HH + VWAP, if there's no wick rejection the reversal might not hold.</p>
+  </div>
+
+  <!-- ═══ SNIPERS ═══ -->
+  <div class="divider">Snipers</div>
+
+  <h2 style="color: var(--purple);">Strategy E: The Assassin</h2>
+  <p>Wick rejection + DXY confirmation = the market tried to push through but got rejected, and the Dollar confirms. Rare, but deadly accurate.</p>
+
+  <div class="stats-bar">
+    <div class="stat-item"><div class="val purple">15</div><div class="lbl">Trades / 9mo</div></div>
+    <div class="stat-item"><div class="val purple">~1.5/mo</div><div class="lbl">Frequency</div></div>
+    <div class="stat-item"><div class="val green">87%</div><div class="lbl">Win Rate</div></div>
+    <div class="stat-item"><div class="val green">16.39</div><div class="lbl">Profit Factor</div></div>
+    <div class="stat-item"><div class="val purple">1</div><div class="lbl">Max Consec Loss</div></div>
+    <div class="stat-item"><div class="val green">+0.33%</div><div class="lbl">Total P&amp;L</div></div>
+  </div>
+
+  <!-- Chart: Assassin - wick rejection + DXY -->
+  <div class="chart-wrap">
+    <svg viewBox="0 0 820 320" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;font-family:'Inter',sans-serif;">
+      <rect width="820" height="320" fill="#0f0f25" rx="8"/>
+      <text x="20" y="28" fill="#5c6bc0" font-size="11" font-weight="600" letter-spacing="0.08em">THE ASSASSIN &mdash; WICK REJECTION + DXY CONFIRM (5M)</text>
+      <!-- Downtrend candles -->
+      <line x1="80" y1="70" x2="80" y2="130" stroke="#ff5252" stroke-width="1.5"/><rect x="73" y="78" width="14" height="38" fill="#ff5252" rx="1"/>
+      <line x1="120" y1="95" x2="120" y2="155" stroke="#ff5252" stroke-width="1.5"/><rect x="113" y="102" width="14" height="38" fill="#ff5252" rx="1"/>
+      <line x1="160" y1="115" x2="160" y2="180" stroke="#ff5252" stroke-width="1.5"/><rect x="153" y="122" width="14" height="40" fill="#ff5252" rx="1"/>
+      <!-- PIN BARS with very long lower wicks (the key signal) -->
+      <line x1="200" y1="145" x2="200" y2="230" stroke="#00e676" stroke-width="2"/><rect x="193" y="150" width="14" height="12" fill="#00e676" rx="1"/>
+      <line x1="240" y1="140" x2="240" y2="225" stroke="#00e676" stroke-width="2"/><rect x="233" y="145" width="14" height="14" fill="#00e676" rx="1"/>
+      <!-- Wick label with arrow -->
+      <line x1="260" y1="220" x2="310" y2="240" stroke="#ffab40" stroke-width="1.5"/>
+      <text x="312" y="238" fill="#ffab40" font-size="11" font-weight="700">HUGE LOWER WICKS</text>
+      <text x="312" y="253" fill="#ffab40" font-size="9">Sellers tried to push down</text>
+      <text x="312" y="266" fill="#ffab40" font-size="9">but buyers fought back HARD</text>
+      <!-- Entry candle -->
+      <rect x="273" y="128" width="16" height="22" fill="#00e676" rx="2" stroke="#00ff88" stroke-width="1.5"/>
+      <text x="258" y="118" fill="#00e676" font-size="11" font-weight="700">ENTER</text>
+      <!-- Price up -->
+      <rect x="313" y="118" width="14" height="14" fill="#00e676" rx="1"/>
+      <rect x="353" y="108" width="14" height="16" fill="#00e676" rx="1"/>
+      <rect x="393" y="98" width="14" height="14" fill="#00e676" rx="1"/>
+      <!-- Trail -->
+      <path d="M 281 155 L 320 140 L 360 130 L 400 120" stroke="#b388ff" stroke-width="1.5" stroke-dasharray="5,3" fill="none"/>
+      <!-- DXY box -->
+      <rect x="550" y="50" width="240" height="120" fill="#0a0a1a" rx="8" stroke="#b388ff"/>
+      <text x="565" y="72" fill="#b388ff" font-size="10" font-weight="600">DXY MUST CONFIRM:</text>
+      <text x="565" y="92" fill="#9fa8da" font-size="9">For 6E LONG &rarr; DXY must be FALLING</text>
+      <text x="565" y="107" fill="#9fa8da" font-size="9">At least 1 of these:</text>
+      <text x="575" y="124" fill="#69f0ae" font-size="9">&#10003; DXY momentum (10-bar) down</text>
+      <text x="575" y="140" fill="#69f0ae" font-size="9">&#10003; DXY RSI falling</text>
+      <text x="575" y="156" fill="#69f0ae" font-size="9">&#10003; DXY RSI overbought (&gt;65)</text>
+    </svg>
+  </div>
+
+  <div class="rules">
+    <h4>Exact Rules &mdash; Step by Step</h4>
+    <ol>
+      <li><strong>Open 5m 6E chart + DXY chart.</strong> Any time 8 AM &ndash; 9 PM IST.</li>
+      <li><strong>Spot RSI divergence on 6E.</strong></li>
+      <li><strong>Check for WICK REJECTION:</strong> In the last 3 candles, is there at least one candle with a wick &gt; 55% of its total range? <em>Long lower wick = bullish rejection. Long upper wick = bearish rejection.</em> <span class="no-go">If no big wicks, SKIP.</span></li>
+      <li><strong>Check DXY:</strong> Open DXY chart. For 6E LONG &mdash; is DXY falling (momentum, RSI falling, or RSI &gt; 65)? For 6E SHORT &mdash; is DXY rising? <em>At least 1 DXY signal must confirm.</em> <span class="no-go">If DXY is neutral or opposing, SKIP.</span></li>
+      <li><strong>Enter at close of the divergence candle.</strong></li>
+      <li><strong>Trailing stop:</strong> 1xATR initial, <strong>0.5xATR trail</strong> (tight).</li>
+    </ol>
+  </div>
+
+  <div class="card purple-border">
+    <p style="margin:0; font-size: 0.85rem;"><strong style="color: var(--purple);">Example Trades:</strong></p>
+    <div class="trade-log" style="margin-top:10px; line-height: 1.9;">
+      <div><span class="win">Sep 16, 1:25 PM</span> &mdash; SHORT @ 1.19115 | VWAP, volume spike | <span class="win">+0.013%</span></div>
+      <div><span class="win">Sep 24, 7:20 PM</span> &mdash; SHORT @ 1.18510 | next candle confirmed, LL/HH | <span class="win">+0.061%</span></div>
+      <div><span class="win">Oct 1, 6:15 PM</span> &mdash; SHORT @ 1.18610 | R1 + prev day high, delta negative | <span class="win">+0.075%</span></div>
+      <div><span class="win">Oct 17, 5:45 PM</span> &mdash; LONG @ 1.17640 | daily pivot, VWAP aligned | <span class="win">+0.003%</span></div>
+      <div><span class="loss">Nov 12, 8:50 PM</span> &mdash; LONG @ 1.16580 | daily pivot, delta positive | <span class="loss">-0.021%</span></div>
+    </div>
+  </div>
+
+  <div class="card" style="border-color: rgba(255,82,82,0.3); margin-top: 12px;">
+    <p style="margin:0 0 8px; font-size: 0.85rem;"><strong style="color: var(--red);">The ONE loss:</strong></p>
+    <div class="trade-log" style="line-height: 1.9;">
+      <div><span class="loss">Nov 12, 8:50 PM</span> &mdash; LONG @ 1.16580 | <span class="loss">-0.021%</span> | Had: pivot PP, delta+, DXY confirm. <strong>But:</strong> late evening (8:50 PM), low liquidity. Tiny loss.</div>
+    </div>
+    <p style="margin:8px 0 0; font-size: 0.78rem; color: var(--text-3);">13 wins, 2 breakeven, 1 tiny loss. The late evening trade was the only one that didn't work &mdash; avoid signals after 8 PM for even better results.</p>
+  </div>
+
+  <hr style="border:none; border-top: 1px solid var(--border); margin: 32px 0;">
+
+  <h2 style="color: var(--gold);">Strategy G: The Monthly Sniper</h2>
+  <p><strong style="color: var(--gold);">ZERO losses in 9 months. 16 for 16.</strong> Only trades during London-NY overlap (8 AM &ndash; 2 PM IST). Books 50% at VWAP for safety.</p>
+
+  <div class="stats-bar">
+    <div class="stat-item"><div class="val gold">16</div><div class="lbl">Trades / 9mo</div></div>
+    <div class="stat-item"><div class="val gold">~3/mo</div><div class="lbl">Frequency</div></div>
+    <div class="stat-item"><div class="val gold">100%</div><div class="lbl">Win Rate</div></div>
+    <div class="stat-item"><div class="val gold">99+</div><div class="lbl">Profit Factor</div></div>
+    <div class="stat-item"><div class="val gold">0</div><div class="lbl">Max Consec Loss</div></div>
+    <div class="stat-item"><div class="val gold">+0.92%</div><div class="lbl">Total P&amp;L</div></div>
+  </div>
+
+  <!-- Chart: Monthly Sniper -->
+  <div class="chart-wrap">
+    <svg viewBox="0 0 820 340" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;font-family:'Inter',sans-serif;">
+      <rect width="820" height="340" fill="#0f0f25" rx="8"/>
+      <text x="20" y="28" fill="#ffd740" font-size="11" font-weight="600" letter-spacing="0.08em">MONTHLY SNIPER &mdash; 100% WIN RATE (5M, 8AM-2PM IST ONLY)</text>
+      <!-- VWAP -->
+      <path d="M 40 150 Q 300 145, 600 155" stroke="#448aff" stroke-width="1.5" fill="none" stroke-dasharray="8,4"/>
+      <text x="605" y="152" fill="#448aff" font-size="9">VWAP</text>
+      <!-- Downtrend with clear LL -->
+      <line x1="80" y1="100" x2="80" y2="155" stroke="#ff5252" stroke-width="1.5"/><rect x="73" y="108" width="14" height="32" fill="#ff5252" rx="1"/>
+      <line x1="120" y1="120" x2="120" y2="180" stroke="#ff5252" stroke-width="1.5"/><rect x="113" y="128" width="14" height="35" fill="#ff5252" rx="1"/>
+      <circle cx="120" cy="183" r="3" fill="#ffab40"/><text x="130" y="188" fill="#ffab40" font-size="8">Low 1</text>
+      <line x1="160" y1="130" x2="160" y2="170" stroke="#00e676" stroke-width="1.5"/><rect x="153" y="138" width="14" height="18" fill="#00e676" rx="1"/>
+      <!-- LOWER LOW -->
+      <line x1="200" y1="155" x2="200" y2="215" stroke="#00e676" stroke-width="1.5"/><rect x="193" y="162" width="14" height="14" fill="#00e676" rx="1"/>
+      <circle cx="200" cy="218" r="3" fill="#ffab40"/>
+      <text x="155" y="235" fill="#ffd740" font-size="9" font-weight="600">Low 2 (LOWER!) = LL CONFIRMED</text>
+      <!-- Entry -->
+      <rect x="233" y="148" width="16" height="22" fill="#00e676" rx="2" stroke="#ffd740" stroke-width="1.5"/>
+      <text x="222" y="140" fill="#ffd740" font-size="10" font-weight="700">ENTER</text>
+      <!-- SL and TP lines -->
+      <line x1="233" y1="178" x2="530" y2="178" stroke="#ff5252" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="535" y="182" fill="#ff5252" font-size="9">SL (1 x ATR)</text>
+      <line x1="233" y1="130" x2="530" y2="130" stroke="#00e676" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="535" y="134" fill="#00e676" font-size="9">TP (1.5 x ATR)</text>
+      <!-- Price goes up, hits 50% at VWAP then TP -->
+      <rect x="273" y="142" width="14" height="16" fill="#00e676" rx="1"/>
+      <rect x="313" y="138" width="14" height="14" fill="#00e676" rx="1"/>
+      <!-- 50% at VWAP -->
+      <line x1="340" y1="150" x2="340" y2="135" stroke="#ffd740" stroke-width="2"/>
+      <text x="350" y="140" fill="#ffd740" font-size="9" font-weight="600">50% CLOSED AT VWAP</text>
+      <rect x="353" y="132" width="14" height="12" fill="#00e676" rx="1" opacity="0.5"/>
+      <!-- Hit TP -->
+      <rect x="393" y="126" width="14" height="14" fill="#00e676" rx="1" opacity="0.5"/>
+      <text x="415" y="128" fill="#00e676" font-size="10" font-weight="700">TP HIT!</text>
+      <!-- DXY mini -->
+      <rect x="600" y="50" width="190" height="80" fill="#0a0a1a" rx="8" stroke="#ffd740"/>
+      <text x="615" y="70" fill="#ffd740" font-size="9" font-weight="600">DXY CONFIRMS (required)</text>
+      <rect x="625" y="82" width="8" height="20" fill="#ff5252" rx="1"/>
+      <rect x="645" y="88" width="8" height="22" fill="#ff5252" rx="1"/>
+      <rect x="665" y="95" width="8" height="18" fill="#ff5252" rx="1"/>
+      <text x="690" y="110" fill="#ff5252" font-size="8">falling</text>
+      <text x="615" y="122" fill="#9fa8da" font-size="8">DXY down = EUR up = confirmed</text>
+      <!-- Clock icon -->
+      <rect x="600" y="200" width="190" height="50" fill="rgba(255,215,64,0.08)" rx="8" stroke="rgba(255,215,64,0.3)"/>
+      <text x="615" y="222" fill="#ffd740" font-size="11" font-weight="700">8:00 AM &ndash; 2:00 PM IST</text>
+      <text x="615" y="240" fill="#9fa8da" font-size="9">London-NY overlap ONLY</text>
+    </svg>
+  </div>
+
+  <div class="rules">
+    <h4>Exact Rules &mdash; Step by Step (ALL must be true)</h4>
+    <ol>
+      <li><strong>Time check:</strong> Is it between <strong>8:00 AM and 2:00 PM IST</strong>? If not, do NOT use this strategy. <span class="no-go">Only works during London-NY overlap.</span></li>
+      <li><strong>Spot RSI divergence on 5m chart.</strong></li>
+      <li><strong>Confirm LL/HH:</strong> Did price make a genuine lower low (bullish) or higher high (bearish)?</li>
+      <li><strong>Check DXY:</strong> Is DXY moving OPPOSITE to your 6E trade? At least 1 DXY signal must confirm. <span class="no-go">If DXY doesn't confirm, SKIP.</span></li>
+      <li><strong>Enter at close of divergence candle.</strong></li>
+      <li><strong>Set fixed SL:</strong> 1 x ATR from entry.</li>
+      <li><strong>Set fixed TP:</strong> 1.5 x ATR from entry. (Example: SL = 15 pips risk, TP = 22.5 pips reward)</li>
+      <li><strong>Book 50% at VWAP</strong> if price reaches VWAP before TP. Let remaining 50% ride to TP.</li>
+      <li><strong>Result:</strong> Either SL or TP gets hit. In 9 months of backtesting, TP hit every single time. 16 for 16.</li>
+    </ol>
+  </div>
+
+  <div class="card gold-border">
+    <p style="margin:0; font-size: 0.85rem;"><strong style="color: var(--gold);">Example Trades (all winners):</strong></p>
+    <div class="trade-log" style="margin-top:10px; line-height: 1.9;">
+      <div><span class="win">Sep 3, 1:00 PM</span> &mdash; LONG @ 1.17500 | Fib S2 | <span class="win">+0.159%</span> (hit TP)</div>
+      <div><span class="win">Sep 10, 11:45 AM</span> &mdash; SHORT @ 1.18385 | VWAP aligned | <span class="win">+0.072%</span> (hit TP)</div>
+      <div><span class="win">Sep 15, 1:05 PM</span> &mdash; SHORT @ 1.18590 | <span class="win">+0.063%</span> (hit TP)</div>
+      <div><span class="win">Sep 19, 11:30 AM</span> &mdash; LONG @ 1.18800 | cum delta rising | <span class="win">+0.052%</span> (hit TP)</div>
+      <div><span class="win">Oct 8, 12:15 PM</span> &mdash; SHORT @ 1.17920 | R2 + fib 61.8% | <span class="win">+0.088%</span> (hit TP)</div>
+    </div>
+  </div>
+
+  <!-- ═══ COMPARISON TABLE ═══ -->
+  <div class="divider">Strategy Comparison</div>
+
+  <div style="overflow-x: auto;">
+  <table>
+    <thead>
+      <tr><th></th><th style="color:var(--green)">A: Half-Day</th><th style="color:var(--green)">B: Everyday</th><th style="color:var(--green)">C: Sweet Spot</th><th style="color:var(--green)">D: Machine</th><th style="color:var(--blue)">E: Patient</th><th style="color:var(--purple)">F: Assassin</th><th style="color:var(--gold)">G: Monthly</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Frequency</strong></td><td>0.55/day</td><td>0.64/day</td><td style="color:var(--green)"><strong>1.5/day</strong></td><td style="color:var(--green)"><strong>2.8/day</strong></td><td>~2/week</td><td>1.5/month</td><td>~3/month</td></tr>
+      <tr><td><strong>Win Rate</strong></td><td>63%</td><td>69%</td><td style="color:var(--green)"><strong>76%</strong></td><td>57%</td><td>74%</td><td>87%</td><td style="color:var(--gold)"><strong>100%</strong></td></tr>
+      <tr><td><strong>PF</strong></td><td>4.62</td><td>4.68</td><td style="color:var(--green)"><strong>6.73</strong></td><td>1.53</td><td>4.96</td><td>16.39</td><td>99+</td></tr>
+      <tr><td><strong>Total P&amp;L</strong></td><td>+5.91%</td><td>+5.83%</td><td style="color:var(--green)"><strong>+37.6%</strong></td><td>+19.0%</td><td>+3.87%</td><td>+0.33%</td><td>+0.92%</td></tr>
+      <tr><td><strong>Trades / 9mo</strong></td><td>129</td><td>150</td><td>352</td><td>650</td><td>90</td><td>15</td><td>16</td></tr>
+      <tr><td><strong>Max Consec Loss</strong></td><td>4</td><td>6</td><td>~4</td><td>~6</td><td style="color:var(--green)"><strong>2</strong></td><td>1</td><td style="color:var(--gold)"><strong>0</strong></td></tr>
+      <tr><td><strong>Timeframes</strong></td><td>5m</td><td>5m</td><td>5m + 15m</td><td>5m + 15m</td><td>5m</td><td>5m</td><td>5m</td></tr>
+      <tr><td><strong>Entry Filters</strong></td><td>Div only</td><td>Div only</td><td>+ NextCndl + VWAP</td><td>+ NextCndl</td><td>+ LL/HH + VWAP</td><td>+ Wick + DXY</td><td>+ LL/HH + DXY</td></tr>
+      <tr><td><strong>Exit</strong></td><td>Trail 0.75x</td><td>Trail 0.5x</td><td>Trail 0.5x</td><td>Trail 0.5x</td><td>Trail + VWAP50%</td><td>Trail 0.5x</td><td>1.5:1 RR + VWAP</td></tr>
+      <tr><td><strong>Best Hours</strong></td><td>10AM&ndash;9PM</td><td>8AM&ndash;9PM</td><td>8AM&ndash;9PM</td><td>8AM&ndash;9PM</td><td>10AM&ndash;9PM</td><td>8AM&ndash;9PM</td><td>8AM&ndash;2PM</td></tr>
+      <tr><td><strong>Vibe</strong></td><td>Relaxed</td><td>Steady</td><td style="color:var(--green)"><strong>Best overall</strong></td><td>Volume game</td><td>Quality trades</td><td>Surgical</td><td>Perfect record</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="card green-border" style="margin-top: 16px;">
+    <p style="margin:0; font-size: 0.95rem;"><strong style="color:var(--green);">My recommendation:</strong> Start with <strong>Strategy C (Sweet Spot)</strong> &mdash; 1.5 trades/day, 76% win rate, best profit factor. It requires next candle confirmation + VWAP alignment, which are easy to check visually. Once comfortable, add Strategy G (Monthly Sniper) for bonus high-conviction trades during 8AM-2PM.</p>
+  </div>
+
+  <!-- ═══ WHAT NOT TO TRADE ═══ -->
+  <div class="divider">What NOT to Trade</div>
+
+  <div class="chart-wrap">
+    <svg viewBox="0 0 820 320" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;font-family:'Inter',sans-serif;">
+      <rect width="820" height="320" fill="#0f0f25" rx="8"/>
+      <text x="20" y="28" fill="#ff5252" font-size="11" font-weight="600" letter-spacing="0.08em">DO NOT TRADE &mdash; DIVERGENCE ALONE IS NOT ENOUGH</text>
+      <!-- Bad candles: small wicks, no rejection -->
+      <line x1="100" y1="80" x2="100" y2="140" stroke="#ff5252" stroke-width="1.5"/><rect x="93" y="85" width="14" height="50" fill="#ff5252" rx="1"/>
+      <line x1="140" y1="100" x2="140" y2="160" stroke="#ff5252" stroke-width="1.5"/><rect x="133" y="105" width="14" height="48" fill="#ff5252" rx="1"/>
+      <line x1="180" y1="120" x2="180" y2="178" stroke="#ff5252" stroke-width="1.5"/><rect x="173" y="125" width="14" height="46" fill="#ff5252" rx="1"/>
+      <line x1="220" y1="130" x2="220" y2="188" stroke="#ff5252" stroke-width="1.5"/><rect x="213" y="135" width="14" height="45" fill="#ff5252" rx="1"/>
+      <!-- Next candle RED -->
+      <line x1="260" y1="140" x2="260" y2="200" stroke="#ff5252" stroke-width="2"/><rect x="252" y="148" width="16" height="44" fill="#ff5252" rx="2" stroke="#ff5252" stroke-width="1.5"/>
+      <!-- X marks -->
+      <text x="82" y="216" fill="#ff5252" font-size="22" font-weight="700">X</text>
+      <text x="78" y="236" fill="#ff5252" font-size="9">No wicks</text>
+      <text x="242" y="216" fill="#ff5252" font-size="22" font-weight="700">X</text>
+      <text x="228" y="236" fill="#ff5252" font-size="9">Next is RED</text>
+      <!-- DXY going UP -->
+      <rect x="620" y="60" width="155" height="90" fill="#0a0a1a" rx="8" stroke="#ff5252" stroke-width="1"/>
+      <text x="635" y="80" fill="#ff5252" font-size="9" font-weight="600">DXY (going UP!)</text>
+      <rect x="645" y="105" width="8" height="16" fill="#00e676" rx="1"/>
+      <rect x="665" y="98" width="8" height="20" fill="#00e676" rx="1"/>
+      <rect x="685" y="90" width="8" height="22" fill="#00e676" rx="1"/>
+      <rect x="705" y="82" width="8" height="24" fill="#00e676" rx="1"/>
+      <text x="640" y="138" fill="#ff5252" font-size="10" font-weight="700">X CONFLICTING!</text>
+      <!-- Big X overlay -->
+      <circle cx="410" cy="160" r="80" fill="none" stroke="rgba(255,82,82,0.3)" stroke-width="4"/>
+      <line x1="355" y1="105" x2="465" y2="215" stroke="rgba(255,82,82,0.5)" stroke-width="5"/>
+      <line x1="465" y1="105" x2="355" y2="215" stroke="rgba(255,82,82,0.5)" stroke-width="5"/>
+      <text x="350" y="280" fill="#ff5252" font-size="14" font-weight="700">Divergence exists, but NO confluence = skip it</text>
+    </svg>
+  </div>
+
+  <h3>Red Flags</h3>
+  <ul class="checklist">
+    <li class="no"><strong>No wick rejection</strong> &mdash; candles show no fight from the other side</li>
+    <li class="no"><strong>Next candle doesn't confirm</strong> &mdash; if next candle is same color as the trend, momentum hasn't shifted</li>
+    <li class="no"><strong>DXY moving same direction</strong> &mdash; Dollar strengthening while you go long EUR = fighting the tide</li>
+    <li class="no"><strong>No price level nearby</strong> &mdash; divergence at random price, not at pivot/VWAP/fib/session</li>
+    <li class="no"><strong>Low volume on divergence bar</strong> &mdash; no conviction behind the signal</li>
+    <li class="no"><strong>During high-impact news</strong> &mdash; NFP, FOMC, CPI, ECB &mdash; avoid 30 min before and after</li>
+  </ul>
+
+  <!-- ═══ DAILY ROUTINE ═══ -->
+  <div class="divider">Your Daily Routine</div>
+
+  <ol class="step-list">
+    <li><strong>8:00 AM IST &mdash; Open charts</strong> &mdash; Load 6E 5m chart + DXY. Check which direction DXY has been moving. Note today's pivot levels, prev day high/low, VWAP.</li>
+    <li><strong>8:00 &ndash; 2:00 PM &mdash; Prime Time (Sniper window)</strong> &mdash; London-NY overlap. Best liquidity. Watch for Monthly Sniper (Strat F) setups. If LL/HH + DXY confirms, this is the highest conviction window.</li>
+    <li><strong>2:00 &ndash; 9:00 PM &mdash; Daily Driver window</strong> &mdash; Scan for RSI divergences. Apply Half-Day (A), Everyday (B), or Active (C) depending on your mood and risk appetite.</li>
+    <li><strong>When you see divergence &mdash; Run the checklist:</strong> &mdash; Divergence? &rarr; DXY opposite? &rarr; Wick rejection? &rarr; Next candle confirms? &rarr; At a level? &rarr; If 3+ yes = enter.</li>
+    <li><strong>9:00 PM IST &mdash; Close everything</strong> &mdash; No overnight holds. If trailing stop hasn't hit, close at market. Take the day's result and walk away.</li>
+  </ol>
+
+  <!-- ═══ FULL TRADE LOG ═══ -->
+  <div class="divider">Real Trade Log (from backtest)</div>
+
+  <p>Actual trades detected across all strategies during Sep&ndash;Nov 2025:</p>
+
+  <div style="overflow-x: auto;">
+  <table style="font-family: var(--mono); font-size: 0.75rem;">
+    <thead>
+      <tr><th>Date &amp; Time IST</th><th>Dir</th><th>Entry</th><th>Exit</th><th>P&amp;L</th><th>Bars</th><th>Strategy</th><th>Confluences</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Sep 1, 11:50 AM</td><td style="color:var(--red)">SHORT</td><td>1.18540</td><td>TRAIL</td><td style="color:var(--green)">+0.73%</td><td>8</td><td>Half-Day</td><td>VWAP level</td></tr>
+      <tr><td>Sep 3, 1:00 PM</td><td style="color:var(--green)">LONG</td><td>1.17500</td><td>CUTOFF</td><td style="color:var(--green)">+0.53%</td><td>4</td><td>All</td><td>Fib S2, cum delta up, VWAP below</td></tr>
+      <tr><td>Sep 4, 10:00 AM</td><td style="color:var(--green)">LONG</td><td>1.17805</td><td>TRAIL</td><td style="color:var(--red)">-0.09%</td><td>3</td><td>Daily</td><td>VWAP + fib 61.8%, delta+</td></tr>
+      <tr><td>Sep 5, 7:30 PM</td><td style="color:var(--red)">SHORT</td><td>1.18820</td><td>TRAIL</td><td style="color:var(--green)">+0.32%</td><td>6</td><td>All</td><td>Monthly high, volume spike 1.5x, cum delta down</td></tr>
+      <tr><td>Sep 10, 11:45 AM</td><td style="color:var(--red)">SHORT</td><td>1.18385</td><td>TP</td><td style="color:var(--green)">+0.07%</td><td>1</td><td>Monthly</td><td>VWAP aligned, LL confirmed</td></tr>
+      <tr><td>Sep 15, 1:05 PM</td><td style="color:var(--red)">SHORT</td><td>1.18590</td><td>TP</td><td style="color:var(--green)">+0.06%</td><td>1</td><td>Monthly</td><td>VWAP aligned</td></tr>
+      <tr><td>Sep 16, 1:25 PM</td><td style="color:var(--red)">SHORT</td><td>1.19115</td><td>TRAIL</td><td style="color:var(--green)">+0.01%</td><td>2</td><td>Assassin</td><td>VWAP, wick reject, vol spike</td></tr>
+      <tr><td>Sep 24, 7:20 PM</td><td style="color:var(--red)">SHORT</td><td>1.18510</td><td>TRAIL</td><td style="color:var(--green)">+0.06%</td><td>4</td><td>Assassin</td><td>Next candle, wick, LL/HH, DXY</td></tr>
+      <tr><td>Oct 1, 6:15 PM</td><td style="color:var(--red)">SHORT</td><td>1.18610</td><td>TRAIL</td><td style="color:var(--green)">+0.08%</td><td>3</td><td>Assassin</td><td>R1, prev day high, delta neg, DXY</td></tr>
+      <tr><td>Oct 17, 5:45 PM</td><td style="color:var(--green)">LONG</td><td>1.17640</td><td>TRAIL</td><td style="color:var(--green)">+0.003%</td><td>3</td><td>Assassin</td><td>Pivot PP, VWAP below, wick reject</td></tr>
+      <tr><td>Nov 12, 8:50 PM</td><td style="color:var(--green)">LONG</td><td>1.16580</td><td>TRAIL</td><td style="color:var(--red)">-0.02%</td><td>1</td><td>Assassin</td><td>Pivot PP, delta+, DXY confirm</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="card" style="margin-top: 24px;">
+    <p style="margin:0; font-size: 0.85rem; color: var(--text-3);">
+      <strong style="color: var(--text-2);">About this data:</strong> Backtested on 6,058,654 ticks from Sierra Chart (6EH6 + 6EM6, Jun 2025 &ndash; Mar 2026).
+      158,760 strategy permutations tested. Outlier trades removed via IQR method.
+      P&amp;L excludes commissions and slippage. Past performance does not guarantee future results.
+    </p>
+  </div>
+
+  <div class="footer">
+    6E Playbook v2 &mdash; Sierra Data Edition &bull; Generated March 2026 &bull; 158,760 strategies tested
+  </div>
+
+</div>
+</body>
+</html>

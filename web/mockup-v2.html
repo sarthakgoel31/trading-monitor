@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6E Trading Console</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #060610; color: #e2e8f0; font-family: 'Inter', -apple-system, system-ui, sans-serif; font-size: 13px; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+  /* Header */
+  .header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: #0c0c18; border-bottom: 1px solid #1e293b; flex-shrink: 0; }
+  .header-left { display: flex; align-items: center; gap: 24px; }
+  .logo { font-size: 10px; color: #3b82f6; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; }
+  .price-big { font-size: 28px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .vwap-val { font-size: 14px; color: #94a3b8; }
+  .vwap-dist { color: #ef4444; font-weight: 600; }
+  .prev-day { font-size: 11px; color: #475569; margin-top: 1px; }
+  .header-right { display: flex; align-items: center; gap: 14px; }
+  .status-dot { width: 9px; height: 9px; border-radius: 50%; background: #22c55e; display: inline-block; box-shadow: 0 0 8px #22c55e60; }
+  .countdown { font-size: 13px; color: #64748b; font-variant-numeric: tabular-nums; }
+  .scan-btn { padding: 7px 14px; border-radius: 8px; border: 1px solid #334155; background: transparent; color: #94a3b8; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+  .scan-btn:hover { border-color: #3b82f6; color: #3b82f6; }
+  .toggle-btn { padding: 7px 18px; border-radius: 8px; border: none; font-size: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; background: #22c55e; color: #000; }
+
+  /* State Banner — with micro lesson */
+  .state-bar { padding: 8px 16px; text-align: center; flex-shrink: 0; }
+  .state-standdown { background: linear-gradient(90deg, #0a0610, #150808, #0a0610); border-bottom: 1px solid #7f1d1d25; }
+  .state-standdown .state-title { color: #ef4444; font-size: 14px; font-weight: 700; letter-spacing: 2px; }
+  .state-standdown .state-lesson { color: #94a3b8; font-size: 12px; font-style: italic; margin-top: 2px; }
+  .state-setup { background: linear-gradient(90deg, #0a0610, #081508, #0a0610); border-bottom: 1px solid #16653430; animation: pulse-green 1.5s ease infinite; }
+  .state-setup .state-title { color: #22c55e; font-size: 18px; font-weight: 700; letter-spacing: 3px; }
+  @keyframes pulse-green { 0%,100% { opacity:1; } 50% { opacity:0.7; } }
+
+  /* Main Grid */
+  .main-grid { flex: 1; display: grid; grid-template-columns: 1.1fr 1.1fr 0.8fr; grid-template-rows: 1.2fr 1fr; gap: 6px; padding: 6px; min-height: 0; overflow: hidden; }
+
+  /* Cards */
+  .card { background: #0c0c18; border: 1px solid #1e293b; border-radius: 10px; padding: 10px 12px; overflow-y: auto; min-height: 0; }
+  .card::-webkit-scrollbar { width: 3px; }
+  .card::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+  .card-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #3b82f6; margin-bottom: 8px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+  .card-title .sub { font-size: 9px; color: #475569; font-weight: 400; letter-spacing: 0; text-transform: none; }
+
+  /* Levels */
+  .level-row { display: flex; align-items: center; padding: 3px 0; font-variant-numeric: tabular-nums; font-size: 12px; gap: 6px; }
+  .level-row.current { background: #1e293b; border-radius: 6px; padding: 4px 8px; margin: 1px -8px; }
+  .level-name { flex: 1; font-size: 12px; }
+  .level-price { width: 75px; font-weight: 600; color: #fff; text-align: right; }
+  .level-dist { width: 52px; text-align: right; color: #64748b; font-size: 11px; }
+  .level-tag { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; min-width: 32px; text-align: center; }
+  .tag-ultra { background: #7c3aed12; color: #a78bfa; border: 1px solid #7c3aed30; }
+  .tag-imp { background: #3b82f612; color: #60a5fa; border: 1px solid #3b82f630; }
+
+  /* Delta */
+  .delta-row { display: flex; align-items: center; padding: 3px 0; font-size: 12px; font-variant-numeric: tabular-nums; gap: 6px; }
+  .delta-time { color: #64748b; width: 42px; font-size: 11px; }
+  .delta-bar { width: 32px; text-align: center; font-weight: 700; font-size: 10px; padding: 2px 3px; border-radius: 3px; }
+  .bar-red { background: #ef444418; color: #ef4444; }
+  .bar-green { background: #22c55e18; color: #22c55e; }
+  .delta-val { width: 48px; text-align: right; font-weight: 600; }
+  .delta-cd { width: 52px; text-align: right; color: #64748b; font-size: 11px; }
+  .delta-flag { font-size: 9px; color: #f59e0b; font-weight: 700; background: #f59e0b12; padding: 1px 5px; border-radius: 3px; }
+  .cum-summary { margin-top: 6px; padding: 6px 10px; background: #0f172a; border-radius: 8px; font-size: 11px; display: flex; gap: 14px; }
+  .cum-label { color: #64748b; }
+  .cum-falling { color: #ef4444; font-weight: 600; }
+
+  /* Right Stack */
+  .right-stack { display: flex; flex-direction: column; gap: 6px; min-height: 0; overflow: hidden; }
+
+  /* Checklist */
+  .check-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 12px; }
+  .check-icon { width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+  .icon-pass { background: #22c55e18; color: #22c55e; }
+  .icon-fail { background: #ef444418; color: #ef4444; }
+
+  /* Indicators */
+  .ind-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+  .ind-box { background: #0f172a; border-radius: 8px; padding: 7px 9px; }
+  .ind-label { font-size: 9px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
+  .ind-val { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .ind-oversold { color: #f59e0b; }
+  .ind-sub { font-size: 9px; color: #475569; }
+  .rsi-div { margin-top: 5px; padding: 4px 8px; background: #0f172a; border-radius: 6px; font-size: 11px; }
+
+  /* Bottom row */
+  .bottom-row { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; min-height: 0; overflow: hidden; }
+
+  /* Market Intel */
+  .intel-composite { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 6px 10px; background: #0f172a; border-radius: 8px; }
+  .sentiment-score { font-size: 18px; font-weight: 700; color: #22c55e; }
+  .sentiment-text { font-size: 11px; color: #94a3b8; }
+  .sentiment-bar { flex: 1; height: 6px; border-radius: 3px; background: #1e293b; overflow: hidden; }
+  .sentiment-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #64748b, #22c55e); }
+  .intel-section { margin-bottom: 4px; }
+  .intel-source { font-size: 9px; color: #3b82f6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; font-weight: 600; }
+  .intel-text { font-size: 11px; color: #94a3b8; line-height: 1.3; }
+  .intel-headline { font-size: 11px; color: #cbd5e1; padding: 1px 0; }
+  .intel-headline::before { content: "\25b8 "; color: #3b82f6; }
+  .intel-tag { font-size: 8px; padding: 1px 5px; border-radius: 3px; font-weight: 600; }
+  .tag-bull { background: #22c55e15; color: #22c55e; }
+  .tag-bear { background: #ef444415; color: #ef4444; }
+  .tag-neutral { background: #64748b15; color: #94a3b8; }
+  .tv-counts { font-size: 12px; margin-bottom: 3px; }
+  .tv-bar { display: flex; height: 5px; border-radius: 3px; overflow: hidden; }
+  .tv-buy { background: #22c55e; }
+  .tv-sell { background: #ef4444; }
+  .tv-neut { background: #475569; }
+  .reddit-post { font-size: 11px; color: #94a3b8; padding: 2px 0; }
+  .reddit-meta { font-size: 9px; color: #475569; }
+  .intel-insight { padding: 6px 10px; background: #0f172a; border-left: 3px solid #3b82f6; border-radius: 0 8px 8px 0; font-size: 11px; color: #94a3b8; line-height: 1.5; margin-top: 6px; }
+
+  /* Trade Plan */
+  .plan-row { padding: 4px 0; }
+  .plan-label { font-size: 10px; color: #3b82f6; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1px; }
+  .plan-text { font-size: 12px; color: #cbd5e1; line-height: 1.4; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <div>
+      <div class="logo">6E Trading Console</div>
+      <div class="price-big">1.15655</div>
+    </div>
+    <div>
+      <div class="vwap-val">VWAP <span style="color:#fff;font-weight:600">1.15996</span> <span class="vwap-dist">-34.1 pips</span></div>
+      <div class="prev-day">Prev: H 1.16660 | L 1.15925 | C 1.16275 | 74p range</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="status-dot"></span>
+    <span class="countdown">Next scan: 4:32</span>
+    <button class="scan-btn">Scan Now</button>
+    <button class="toggle-btn">ON</button>
+  </div>
+</div>
+
+<!-- State Banner + Micro Lesson -->
+<div class="state-bar state-standdown">
+  <div class="state-title">STAND DOWN &mdash; DH|S2 conditions not met</div>
+  <div class="state-lesson">you built DH|S2 to wait for delta confirmation. trust the system, not your gut. go fix that Rakesh query instead.</div>
+</div>
+
+<!-- Main Grid -->
+<div class="main-grid">
+
+  <!-- Levels -->
+  <div class="card">
+    <div class="card-title">Levels</div>
+    <div class="level-row"><span class="level-name">R3</span><span class="level-price">1.17383</span><span class="level-dist">+154p</span><span class="level-tag"></span></div>
+    <div class="level-row"><span class="level-name">R2 + Fib R3</span><span class="level-price">1.17022</span><span class="level-dist">+118p</span><span class="level-tag tag-imp">IMP</span></div>
+    <div class="level-row"><span class="level-name">Fib R2</span><span class="level-price">1.16741</span><span class="level-dist">+90p</span><span class="level-tag"></span></div>
+    <div class="level-row"><span class="level-name">R1 + Prev H</span><span class="level-price">1.16654</span><span class="level-dist">+81p</span><span class="level-tag tag-imp">IMP</span></div>
+    <div class="level-row"><span class="level-name">Fib R1</span><span class="level-price">1.16567</span><span class="level-dist">+73p</span><span class="level-tag"></span></div>
+    <div class="level-row"><span class="level-name">PP + PrevC + FibPP</span><span class="level-price">1.16283</span><span class="level-dist">+44p</span><span class="level-tag tag-ultra">ULTRA</span></div>
+    <div class="level-row"><span class="level-name" style="color:#3b82f6">VWAP</span><span class="level-price" style="color:#3b82f6">1.16065</span><span class="level-dist">+23p</span><span class="level-tag"></span></div>
+    <div class="level-row"><span class="level-name">Fib S1</span><span class="level-price">1.16006</span><span class="level-dist">+17p</span><span class="level-tag"></span></div>
+    <div class="level-row"><span class="level-name">S1 + Prev L</span><span class="level-price">1.15919</span><span class="level-dist">+8p</span><span class="level-tag tag-imp">IMP</span></div>
+    <div class="level-row current"><span class="level-name" style="color:#f59e0b">&#9658; Fib S2</span><span class="level-price" style="color:#f59e0b">1.15832</span><span class="level-dist" style="color:#f59e0b">-1p</span><span class="level-tag" style="color:#f59e0b;font-size:9px;font-weight:700;border:none">HERE</span></div>
+    <div class="level-row"><span class="level-name">S2 + Fib S3</span><span class="level-price">1.15552</span><span class="level-dist">-29p</span><span class="level-tag tag-imp">IMP</span></div>
+    <div class="level-row"><span class="level-name">S3</span><span class="level-price">1.15178</span><span class="level-dist">-66p</span><span class="level-tag"></span></div>
+  </div>
+
+  <!-- Delta -->
+  <div class="card">
+    <div class="card-title">Delta <span class="sub">5-minute bars</span></div>
+    <div class="delta-row"><span class="delta-time">05:50</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#22c55e">+18</span><span class="delta-cd">-1797</span><span class="delta-flag">BUYING</span></div>
+    <div class="delta-row"><span class="delta-time">05:45</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#ef4444">-312</span><span class="delta-cd">-1815</span><span style="width:50px"></span></div>
+    <div class="delta-row"><span class="delta-time">05:40</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#22c55e">+62</span><span class="delta-cd">-1503</span><span class="delta-flag">BUYING</span></div>
+    <div class="delta-row"><span class="delta-time">05:35</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#22c55e">+210</span><span class="delta-cd">-1565</span><span class="delta-flag">BUYING</span></div>
+    <div class="delta-row"><span class="delta-time">05:30</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#ef4444">-51</span><span class="delta-cd">-1775</span><span style="width:50px"></span></div>
+    <div class="delta-row"><span class="delta-time">05:25</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#ef4444">-132</span><span class="delta-cd">-1724</span><span style="width:50px"></span></div>
+    <div class="delta-row"><span class="delta-time">05:20</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#ef4444">-70</span><span class="delta-cd">-1592</span><span style="width:50px"></span></div>
+    <div class="delta-row"><span class="delta-time">05:15</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#ef4444">-49</span><span class="delta-cd">-1522</span><span style="width:50px"></span></div>
+    <div class="delta-row"><span class="delta-time">05:10</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#ef4444">-57</span><span class="delta-cd">-1473</span><span style="width:50px"></span></div>
+    <div class="delta-row"><span class="delta-time">05:05</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#ef4444">-24</span><span class="delta-cd">-1416</span><span style="width:50px"></span></div>
+    <div class="delta-row"><span class="delta-time">05:00</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#ef4444">-55</span><span class="delta-cd">-1392</span><span style="width:50px"></span></div>
+    <div class="delta-row"><span class="delta-time">04:55</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#22c55e">+25</span><span class="delta-cd">-1337</span><span class="delta-flag">BUYING</span></div>
+    <div class="delta-row"><span class="delta-time">04:50</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#ef4444">-11</span><span class="delta-cd">-1362</span><span style="width:50px"></span></div>
+    <div class="delta-row"><span class="delta-time">04:45</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#ef4444">-52</span><span class="delta-cd">-1351</span><span style="width:50px"></span></div>
+    <div class="cum-summary">
+      <span><span class="cum-label">Cum Delta</span> <span class="cum-falling">-1797 FALLING</span></span>
+      <span><span class="cum-label">5bar</span> <span class="cum-falling">-22</span></span>
+      <span><span class="cum-label">10bar</span> <span class="cum-falling">-381</span></span>
+      <span><span class="cum-label">20bar</span> <span class="cum-falling">-716</span></span>
+    </div>
+  </div>
+
+  <!-- Right Stack -->
+  <div class="right-stack">
+    <div class="card" style="flex:0 0 auto">
+      <div class="card-title">DH|S2 Checklist</div>
+      <div class="check-item"><span class="check-icon icon-pass">&#10003;</span> At 2+ confluent level</div>
+      <div class="check-item"><span class="check-icon icon-fail">&#10007;</span> Delta positive</div>
+      <div class="check-item"><span class="check-icon icon-fail">&#10007;</span> Cum delta rising</div>
+      <div class="check-item"><span class="check-icon icon-pass">&#10003;</span> Below VWAP</div>
+    </div>
+    <div class="card" style="flex:1;overflow:hidden">
+      <div class="card-title">Indicators</div>
+      <div class="ind-grid">
+        <div class="ind-box"><div class="ind-label">RSI 5m</div><div class="ind-val">31.4</div></div>
+        <div class="ind-box"><div class="ind-label">RSI 15m</div><div class="ind-val ind-oversold">23.7</div><div class="ind-sub">oversold</div></div>
+        <div class="ind-box"><div class="ind-label">RSI 1h</div><div class="ind-val">33.2</div></div>
+        <div class="ind-box"><div class="ind-label">ATR</div><div class="ind-val">3.8<span style="font-size:11px;color:#64748b">p</span></div><div class="ind-sub">daily: 79p</div></div>
+      </div>
+      <div class="rsi-div"><span style="color:#22c55e;font-weight:600">5m RSI Divergence</span> <span style="color:#64748b">price LL, RSI HL &mdash; bullish</span></div>
+    </div>
+  </div>
+
+  <!-- Bottom Row -->
+  <div class="bottom-row">
+
+    <!-- Market Intel -->
+    <div class="card">
+      <div class="card-title">Market Intel <span class="sub">refreshed 3 min ago</span></div>
+      <div class="intel-composite">
+        <div><div class="sentiment-score">+0.42</div><div class="sentiment-text">BULLISH (moderate)</div></div>
+        <div class="sentiment-bar"><div class="sentiment-fill" style="width:71%"></div></div>
+      </div>
+      <div class="intel-section">
+        <div class="intel-source">Scotia FX Daily</div>
+        <div class="intel-text">EUR supported above 1.1550 on ECB hold expectations. USD softening on mixed data. Key risk: EU inflation at 2.4%.</div>
+      </div>
+      <div class="intel-section">
+        <div class="intel-source">News Headlines</div>
+        <div class="intel-headline">ECB rate decision holds steady as expected <span class="intel-tag tag-bull">bullish</span></div>
+        <div class="intel-headline">Dollar weakens on Fed pause signals <span class="intel-tag tag-bull">bullish</span></div>
+        <div class="intel-headline">EU inflation ticks up to 2.4% <span class="intel-tag tag-bear">bearish</span></div>
+      </div>
+      <div class="intel-section">
+        <div class="intel-source">TradingView Technicals</div>
+        <div class="tv-counts">Buy: <span style="color:#22c55e;font-weight:700">14</span> &nbsp; Sell: <span style="color:#ef4444;font-weight:700">4</span> &nbsp; Neutral: <span style="color:#94a3b8">8</span></div>
+        <div class="tv-bar"><div class="tv-buy" style="width:54%"></div><div class="tv-neut" style="width:31%"></div><div class="tv-sell" style="width:15%"></div></div>
+        <div style="font-size:10px;color:#475569">MAs: Strong Buy &bull; Oscillators: Sell</div>
+      </div>
+      <div class="intel-section">
+        <div class="intel-source">Reddit r/forex</div>
+        <div class="reddit-post">EUR/USD at key support &mdash; bounce or break? <span class="reddit-meta">&#9650;42 &bull; 18 comments</span> <span class="intel-tag tag-bull">bull</span></div>
+        <div class="reddit-post">Anyone shorting Euro here? <span class="reddit-meta">&#9650;15 &bull; 7 comments</span> <span class="intel-tag tag-bear">bear</span></div>
+        <div class="reddit-post">ECB preview thread <span class="reddit-meta">&#9650;31 &bull; 24 comments</span> <span class="intel-tag tag-neutral">mixed</span></div>
+      </div>
+      <div class="intel-insight">Scotia bullish + TV buy-heavy = lean long bias. But EU inflation uptick could limit EUR upside. Watch 1.1550 as key support.</div>
+    </div>
+
+    <!-- Trade Plan -->
+    <div class="card" style="display:flex;flex-direction:column">
+      <div class="card-title">Trade Plan</div>
+
+      <div style="padding:6px 10px;background:#0f172a;border-radius:8px;margin-bottom:8px">
+        <div class="plan-label">Bias</div>
+        <div class="plan-text">Wait for S2 cluster at 1.15552 (-10 pips). Don't enter the middle.</div>
+      </div>
+
+      <div style="padding:6px 10px;background:#0f172a;border-radius:8px;margin-bottom:8px">
+        <div class="plan-label">Key Zone</div>
+        <div class="plan-text">S2 + Fib S3 (1.15552). If delta flips positive 3+ bars, long to VWAP.</div>
+      </div>
+
+      <!-- Setups as mini tables -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;flex:1">
+        <div style="background:#22c55e08;border:1px solid #22c55e20;border-radius:8px;padding:8px 10px">
+          <div style="font-size:10px;color:#22c55e;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Long Setup</div>
+          <table style="width:100%;font-size:11px;border-collapse:collapse">
+            <tr><td style="color:#64748b;padding:2px 0">Entry</td><td style="text-align:right;font-weight:600;color:#fff">1.15550 - 1.15600</td></tr>
+            <tr><td style="color:#64748b;padding:2px 0">Stop Loss</td><td style="text-align:right;font-weight:600;color:#ef4444">1.15450 (10p)</td></tr>
+            <tr><td style="color:#64748b;padding:2px 0">Target 1</td><td style="text-align:right;font-weight:600;color:#22c55e">1.15920 S1 (37p)</td></tr>
+            <tr><td style="color:#64748b;padding:2px 0">Target 2</td><td style="text-align:right;font-weight:600;color:#22c55e">1.16065 VWAP (45p)</td></tr>
+            <tr><td style="color:#64748b;padding:2px 0">R:R</td><td style="text-align:right;font-weight:700;color:#fff">1 : 3.7</td></tr>
+          </table>
+          <div style="font-size:10px;color:#475569;margin-top:4px">Trigger: delta + for 3+ bars at S2</div>
+        </div>
+        <div style="background:#ef444408;border:1px solid #ef444420;border-radius:8px;padding:8px 10px">
+          <div style="font-size:10px;color:#ef4444;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Short Setup</div>
+          <table style="width:100%;font-size:11px;border-collapse:collapse">
+            <tr><td style="color:#64748b;padding:2px 0">Entry</td><td style="text-align:right;font-weight:600;color:#fff">1.15520 (break)</td></tr>
+            <tr><td style="color:#64748b;padding:2px 0">Stop Loss</td><td style="text-align:right;font-weight:600;color:#ef4444">1.15600 (8p)</td></tr>
+            <tr><td style="color:#64748b;padding:2px 0">Target</td><td style="text-align:right;font-weight:600;color:#22c55e">1.15178 S3 (34p)</td></tr>
+            <tr><td style="color:#64748b;padding:2px 0">R:R</td><td style="text-align:right;font-weight:700;color:#fff">1 : 4.2</td></tr>
+          </table>
+          <div style="font-size:10px;color:#475569;margin-top:4px">Trigger: break S2 w/ volume + neg delta</div>
+        </div>
+      </div>
+
+      <div style="padding:5px 10px;background:#f59e0b10;border:1px solid #f59e0b20;border-radius:8px;text-align:center">
+        <span style="color:#f59e0b;font-weight:700;font-size:11px">KILL SWITCH</span>
+        <span style="color:#94a3b8;font-size:11px"> &mdash; No entry after 12 PM IST. Max 1 trade.</span>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>

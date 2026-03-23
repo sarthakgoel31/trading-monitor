@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6E Trading Console — v4</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #060610; color: #e2e8f0; font-family: 'Inter', -apple-system, system-ui, sans-serif; font-size: 13px; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+  .header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: #0c0c18; border-bottom: 1px solid #1e293b; flex-shrink: 0; }
+  .header-left { display: flex; align-items: center; gap: 20px; }
+  .logo { font-size: 10px; color: #3b82f6; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; }
+  .price-big { font-size: 26px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .vwap-val { font-size: 13px; color: #94a3b8; }
+  .vwap-dist { font-weight: 600; }
+  .prev-day { font-size: 10px; color: #475569; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .meta-text { font-size: 9px; color: #475569; text-align: right; line-height: 1.2; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 6px #22c55e60; }
+  .btn { padding: 5px 12px; border-radius: 6px; border: 1px solid #334155; background: transparent; color: #94a3b8; font-size: 11px; cursor: pointer; }
+  .btn-on { background: #22c55e; color: #000; border: none; font-weight: 700; }
+
+  .state-bar { padding: 6px 14px; text-align: center; flex-shrink: 0; background: linear-gradient(90deg, #0a0610, #150808, #0a0610); border-bottom: 1px solid #7f1d1d25; }
+  .state-title { color: #ef4444; font-size: 13px; font-weight: 700; letter-spacing: 2px; }
+  .state-lesson { color: #94a3b8; font-size: 11px; font-style: italic; margin-top: 1px; }
+
+  /*
+    Layout:
+    Top row: [Levels] [Checklist + Delta + Indicators] [Trade Plan]
+    Bottom row: [Market Intel] spanning full width
+  */
+  .main { flex: 1; display: grid; grid-template-columns: 1fr 0.9fr 1.1fr; grid-template-rows: 1fr auto; gap: 5px; padding: 5px; min-height: 0; overflow: hidden; }
+
+  .card { background: #0c0c18; border: 1px solid #1e293b; border-radius: 10px; padding: 9px 11px; overflow-y: auto; min-height: 0; }
+  .card::-webkit-scrollbar { width: 3px; }
+  .card::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+  .card-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #3b82f6; margin-bottom: 6px; font-weight: 600; display: flex; justify-content: space-between; }
+  .card-title .sub { font-size: 9px; color: #475569; font-weight: 400; letter-spacing: 0; text-transform: none; }
+
+  /* Levels */
+  .level-row { display: flex; align-items: center; padding: 2.5px 0; font-variant-numeric: tabular-nums; font-size: 11.5px; gap: 4px; }
+  .level-row.current { background: #1e293b; border-radius: 5px; padding: 3px 7px; margin: 1px -7px; }
+  .level-name { flex: 1; font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .level-price { width: 68px; font-weight: 600; color: #fff; text-align: right; }
+  .level-dist { width: 42px; text-align: right; color: #64748b; font-size: 10px; }
+  .level-tag { font-size: 8px; font-weight: 700; padding: 1px 4px; border-radius: 3px; min-width: 24px; text-align: center; }
+  .tag-ultra { background: #7c3aed12; color: #a78bfa; border: 1px solid #7c3aed30; }
+  .tag-imp { background: #3b82f612; color: #60a5fa; border: 1px solid #3b82f630; }
+  .price-marker { background: #f59e0b08; border: 1px dashed #f59e0b30; border-radius: 5px; padding: 2px 7px; margin: 2px -7px; font-size: 10px; display: flex; justify-content: space-between; color: #f59e0b; }
+
+  /* Middle stack */
+  .mid-stack { display: flex; flex-direction: column; gap: 5px; min-height: 0; overflow: hidden; }
+
+  /* Checklist — major, big checks */
+  .check-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13px; border-bottom: 1px solid #0f172a; }
+  .check-item:last-child { border-bottom: none; }
+  .check-icon { width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+  .icon-pass { background: #22c55e18; color: #22c55e; }
+  .icon-fail { background: #ef444418; color: #ef4444; }
+
+  /* Delta — compact */
+  .delta-row { display: flex; align-items: center; padding: 1.5px 0; font-size: 10.5px; font-variant-numeric: tabular-nums; gap: 3px; }
+  .delta-time { color: #64748b; width: 34px; font-size: 9.5px; }
+  .delta-bar { width: 26px; text-align: center; font-weight: 700; font-size: 8.5px; padding: 1px; border-radius: 2px; }
+  .bar-red { background: #ef444418; color: #ef4444; }
+  .bar-green { background: #22c55e18; color: #22c55e; }
+  .delta-val { width: 38px; text-align: right; font-weight: 600; }
+  .delta-cd { width: 42px; text-align: right; color: #64748b; font-size: 9.5px; }
+  .delta-flag { font-size: 7.5px; color: #f59e0b; font-weight: 700; }
+  .cum-row { margin-top: 3px; padding: 3px 6px; background: #0f172a; border-radius: 5px; font-size: 9.5px; display: flex; gap: 8px; }
+  .cum-label { color: #64748b; }
+  .cum-rising { color: #22c55e; font-weight: 600; }
+  .cum-falling { color: #ef4444; font-weight: 600; }
+
+  /* Indicators — single row compact */
+  .ind-strip { display: flex; gap: 6px; flex-wrap: wrap; }
+  .ind-chip { background: #0f172a; border-radius: 5px; padding: 4px 7px; font-size: 10px; text-align: center; }
+  .ind-chip .label { color: #64748b; font-size: 8px; text-transform: uppercase; letter-spacing: 0.5px; display: block; }
+  .ind-chip .val { font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .ind-warn { color: #f59e0b; }
+  .ind-note { font-size: 9px; padding: 2px 6px; background: #0f172a; border-radius: 4px; margin-top: 3px; }
+
+  /* Trade Plan — major */
+  .plan-block { padding: 6px 9px; background: #0f172a; border-radius: 7px; margin-bottom: 6px; }
+  .plan-label { font-size: 9px; color: #3b82f6; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1px; }
+  .plan-text { font-size: 12px; color: #cbd5e1; line-height: 1.4; }
+  .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 6px; }
+  .setup-card { border-radius: 7px; padding: 8px 10px; }
+  .setup-long { background: #22c55e06; border: 1px solid #22c55e20; }
+  .setup-short { background: #ef444406; border: 1px solid #ef444420; }
+  .setup-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .setup-table { width: 100%; font-size: 11px; border-collapse: collapse; }
+  .setup-table td { padding: 2px 0; }
+  .setup-table td:first-child { color: #64748b; }
+  .setup-table td:last-child { text-align: right; font-weight: 600; color: #fff; }
+  .setup-trigger { font-size: 9px; color: #475569; margin-top: 4px; }
+  .kill-switch { padding: 5px 8px; background: #f59e0b08; border: 1px solid #f59e0b20; border-radius: 7px; text-align: center; font-size: 10px; }
+  .kill-switch b { color: #f59e0b; }
+  .kill-switch span { color: #94a3b8; }
+
+  /* Bottom bar — market intel, full width, compact */
+  .bottom-bar { grid-column: 1 / -1; display: flex; gap: 5px; min-height: 0; }
+  .intel-card { flex: 1; background: #0c0c18; border: 1px solid #1e293b; border-radius: 10px; padding: 6px 10px; display: flex; gap: 14px; align-items: flex-start; overflow: hidden; }
+  .intel-left { flex: 0 0 auto; }
+  .intel-score { font-size: 18px; font-weight: 700; color: #22c55e; }
+  .intel-label { font-size: 9px; color: #94a3b8; }
+  .intel-bar { width: 60px; height: 4px; border-radius: 2px; background: #1e293b; overflow: hidden; margin-top: 2px; }
+  .intel-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, #64748b, #22c55e); }
+  .intel-sections { flex: 1; display: flex; gap: 12px; overflow: hidden; }
+  .intel-sec { flex: 1; min-width: 0; }
+  .intel-src { font-size: 8px; color: #3b82f6; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 2px; }
+  .intel-txt { font-size: 10px; color: #94a3b8; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; }
+  .intel-hl { font-size: 10px; color: #cbd5e1; padding: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .intel-hl::before { content: "\25b8 "; color: #3b82f6; }
+  .intel-tag { font-size: 7px; padding: 1px 3px; border-radius: 2px; font-weight: 600; }
+  .tag-bull { background: #22c55e15; color: #22c55e; }
+  .tag-bear { background: #ef444415; color: #ef4444; }
+  .tag-neutral { background: #64748b15; color: #94a3b8; }
+  .tv-bar { display: flex; height: 3px; border-radius: 2px; overflow: hidden; margin: 2px 0; }
+  .tv-buy { background: #22c55e; }
+  .tv-sell { background: #ef4444; }
+  .tv-neut { background: #475569; }
+  .reddit-post { font-size: 10px; color: #94a3b8; padding: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div>
+      <div class="logo">6E Trading Console</div>
+      <div class="price-big">1.15650</div>
+    </div>
+    <div>
+      <div class="vwap-val">VWAP <span style="color:#fff;font-weight:600">1.15850</span> <span class="vwap-dist" style="color:#ef4444">-20.0p</span></div>
+      <div class="prev-day">Prev: H 1.16660 | L 1.15925 | C 1.16275 | 74p</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="meta-text">Scanned: 02 Apr 13:56<br>Data: 02 Apr 13:50 IST</div>
+    <span class="status-dot"></span>
+    <span style="font-size:11px;color:#64748b">3:12</span>
+    <button class="btn" style="font-size:9px">Auto: ON</button>
+    <button class="btn">Scan Now</button>
+    <button class="btn btn-on">ON</button>
+  </div>
+</div>
+
+<div class="state-bar">
+  <div class="state-title">STAND DOWN &mdash; DH|S2 conditions not met</div>
+  <div class="state-lesson">if Scotia says bullish and delta says bearish &mdash; delta wins. sentiment is context, tape is truth.</div>
+</div>
+
+<div class="main">
+
+  <!-- LEVELS (major) -->
+  <div class="card">
+    <div class="card-title">Levels</div>
+    <div class="level-row"><span class="level-name">R3</span><span class="level-price">1.17383</span><span class="level-dist">+173p</span><span class="level-tag"></span></div>
+    <div class="level-row"><span class="level-name">mo_high</span><span class="level-price">1.17210</span><span class="level-dist">+156p</span><span class="level-tag"></span></div>
+    <div class="level-row"><span class="level-name">R2 + Fib_fR3</span><span class="level-price">1.17022</span><span class="level-dist">+137p</span><span class="level-tag tag-imp">IMP</span></div>
+    <div class="level-row"><span class="level-name">Fib_fR2</span><span class="level-price">1.16741</span><span class="level-dist">+109p</span><span class="level-tag"></span></div>
+    <div class="level-row"><span class="level-name">R1 + pd_high + wk_high</span><span class="level-price">1.16656</span><span class="level-dist">+101p</span><span class="level-tag tag-ultra">ULTRA</span></div>
+    <div class="level-row"><span class="level-name">Fib_fR1</span><span class="level-price">1.16567</span><span class="level-dist">+92p</span><span class="level-tag"></span></div>
+    <div class="level-row"><span class="level-name">PD_VPOC + LDN + NY_VPOC</span><span class="level-price">1.16485</span><span class="level-dist">+84p</span><span class="level-tag tag-ultra">ULTRA</span></div>
+    <div class="level-row"><span class="level-name">pd_close + PD_TPOC + PP</span><span class="level-price">1.16289</span><span class="level-dist">+64p</span><span class="level-tag tag-ultra">ULTRA</span></div>
+    <div class="level-row"><span class="level-name" style="color:#3b82f6">VWAP + Fib_fS1 + Asia_VPOC</span><span class="level-price" style="color:#3b82f6">1.16027</span><span class="level-dist">+38p</span><span class="level-tag tag-ultra">ULTRA</span></div>
+    <div class="level-row"><span class="level-name">S1 + pd_low</span><span class="level-price">1.15919</span><span class="level-dist">+27p</span><span class="level-tag tag-imp">IMP</span></div>
+    <div class="level-row"><span class="level-name" style="color:#3b82f6">Fib_fS2 + VWAP</span><span class="level-price" style="color:#3b82f6">1.15841</span><span class="level-dist">+19p</span><span class="level-tag tag-imp">IMP</span></div>
+    <div class="level-row"><span class="level-name">Mo_VPOC</span><span class="level-price">1.15731</span><span class="level-dist">+8p</span><span class="level-tag"></span></div>
+    <div class="price-marker"><span>&#9658; Price 1.15650</span><span>between levels</span></div>
+    <div class="level-row"><span class="level-name">S2 + Fib_fS3 + Wk_TPOC + Wk_VPOC</span><span class="level-price">1.15578</span><span class="level-dist">-7p</span><span class="level-tag tag-ultra">ULTRA</span></div>
+    <div class="level-row"><span class="level-name">S3</span><span class="level-price">1.15178</span><span class="level-dist">-47p</span><span class="level-tag"></span></div>
+    <div class="level-row"><span class="level-name">wk_low</span><span class="level-price">1.14840</span><span class="level-dist">-81p</span><span class="level-tag"></span></div>
+    <div class="level-row"><span class="level-name">mo_low</span><span class="level-price">1.14615</span><span class="level-dist">-104p</span><span class="level-tag"></span></div>
+  </div>
+
+  <!-- MIDDLE: Checklist (major) + Delta + Indicators (minor) -->
+  <div class="mid-stack">
+    <div class="card" style="flex:0 0 auto">
+      <div class="card-title">DH|S2 Checklist</div>
+      <div class="check-item"><span class="check-icon icon-fail">&#10007;</span> At 2+ confluent level</div>
+      <div class="check-item"><span class="check-icon icon-fail">&#10007;</span> Delta positive</div>
+      <div class="check-item"><span class="check-icon icon-pass">&#10003;</span> Cum delta rising</div>
+      <div class="check-item"><span class="check-icon icon-pass">&#10003;</span> Below VWAP</div>
+    </div>
+
+    <div class="card" style="flex:1;min-height:0;padding:7px 9px">
+      <div class="card-title" style="font-size:9px;margin-bottom:4px">Delta <span class="sub">5m</span></div>
+      <div class="delta-row"><span class="delta-time">13:50</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#ef4444">-81</span><span class="delta-cd">-1213</span><span style="width:30px"></span></div>
+      <div class="delta-row"><span class="delta-time">13:45</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#22c55e">+268</span><span class="delta-cd">-1132</span><span class="delta-flag">BUY</span></div>
+      <div class="delta-row"><span class="delta-time">13:40</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#22c55e">+110</span><span class="delta-cd">-1400</span><span class="delta-flag">BUY</span></div>
+      <div class="delta-row"><span class="delta-time">13:35</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#22c55e">+100</span><span class="delta-cd">-1510</span><span class="delta-flag">BUY</span></div>
+      <div class="delta-row"><span class="delta-time">13:30</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#22c55e">+24</span><span class="delta-cd">-1610</span><span class="delta-flag">BUY</span></div>
+      <div class="delta-row"><span class="delta-time">13:25</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#ef4444">-154</span><span class="delta-cd">-1634</span><span style="width:30px"></span></div>
+      <div class="delta-row"><span class="delta-time">13:20</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#22c55e">+255</span><span class="delta-cd">-1480</span><span class="delta-flag">BUY</span></div>
+      <div class="delta-row"><span class="delta-time">13:15</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#22c55e">+225</span><span class="delta-cd">-1735</span><span class="delta-flag">BUY</span></div>
+      <div class="delta-row"><span class="delta-time">13:10</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#22c55e">+75</span><span class="delta-cd">-1960</span><span class="delta-flag">BUY</span></div>
+      <div class="delta-row"><span class="delta-time">13:05</span><span class="delta-bar bar-red">RED</span><span class="delta-val" style="color:#22c55e">+137</span><span class="delta-cd">-2035</span><span class="delta-flag">BUY</span></div>
+      <div class="cum-row">
+        <span><span class="cum-label">Cum</span> <span class="cum-rising">-1213 RISING</span></span>
+        <span><span class="cum-label">5b</span> <span class="cum-rising">397</span></span>
+        <span><span class="cum-label">10b</span> <span class="cum-rising">822</span></span>
+      </div>
+    </div>
+
+    <div class="card" style="flex:0 0 auto;padding:6px 9px">
+      <div class="card-title" style="font-size:9px;margin-bottom:4px">Indicators</div>
+      <div class="ind-strip">
+        <div class="ind-chip"><span class="label">RSI 5m</span><span class="val">46.3</span></div>
+        <div class="ind-chip"><span class="label">RSI 15m</span><span class="val ind-warn">39.7</span></div>
+        <div class="ind-chip"><span class="label">RSI 1h</span><span class="val">35.2</span></div>
+        <div class="ind-chip"><span class="label">ATR</span><span class="val">5.4<span style="font-size:9px;color:#64748b">p</span></span></div>
+        <div class="ind-chip"><span class="label">Vol</span><span class="val">0.9<span style="font-size:9px;color:#64748b">x</span></span></div>
+      </div>
+      <div class="ind-note"><span style="color:#22c55e;font-weight:600">Bullish wick rejection</span> <span style="color:#64748b">at 13:45</span></div>
+    </div>
+  </div>
+
+  <!-- TRADE PLAN (major) -->
+  <div class="card" style="display:flex;flex-direction:column">
+    <div class="card-title">Trade Plan</div>
+
+    <div class="plan-block">
+      <div class="plan-label">Bias</div>
+      <div class="plan-text">Mixed signals. Cum delta rising but last bar delta negative. Wait for alignment.</div>
+    </div>
+
+    <div class="plan-block">
+      <div class="plan-label">Key Zone</div>
+      <div class="plan-text">S2 + Fib_fS3 + Wk_TPOC + Wk_VPOC at 1.15578 (-7p). ULTRA cluster with 4 confluent levels.</div>
+    </div>
+
+    <div class="setup-grid" style="flex:1">
+      <div class="setup-card setup-long">
+        <div class="setup-title" style="color:#22c55e">Long Setup</div>
+        <table class="setup-table">
+          <tr><td>Entry</td><td>1.15578</td></tr>
+          <tr><td>Stop Loss</td><td style="color:#ef4444">1.15478 (10p)</td></tr>
+          <tr><td>Target 1</td><td style="color:#22c55e">1.15841 FibS2+VW (26p)</td></tr>
+          <tr><td>Target 2</td><td style="color:#22c55e">1.15919 S1+pdL (34p)</td></tr>
+          <tr><td>R:R</td><td style="font-weight:700">1:2.6</td></tr>
+        </table>
+        <div class="setup-trigger">Trigger: Delta + 3 bars at S2 cluster</div>
+      </div>
+      <div class="setup-card setup-short">
+        <div class="setup-title" style="color:#ef4444">Short Setup</div>
+        <table class="setup-table">
+          <tr><td>Entry</td><td>1.15548 (break)</td></tr>
+          <tr><td>Stop Loss</td><td style="color:#ef4444">1.15658 (8p)</td></tr>
+          <tr><td>Target</td><td style="color:#22c55e">1.15178 S3 (37p)</td></tr>
+          <tr><td>R:R</td><td style="font-weight:700">1:4.6</td></tr>
+        </table>
+        <div class="setup-trigger">Trigger: Break S2 w/ vol + neg delta</div>
+      </div>
+    </div>
+
+    <div class="kill-switch">
+      <b>KILL SWITCH</b> <span>&mdash; No entry after 12 PM IST. Max 1 trade.</span>
+    </div>
+  </div>
+
+  <!-- BOTTOM: Market Intel (compact bar) -->
+  <div class="bottom-bar">
+    <div class="intel-card">
+      <div class="intel-left">
+        <div class="intel-score">+0.18</div>
+        <div class="intel-label">BULLISH 70%</div>
+        <div class="intel-bar"><div class="intel-fill" style="width:59%"></div></div>
+      </div>
+      <div class="intel-sections">
+        <div class="intel-sec">
+          <div class="intel-src">Scotia</div>
+          <div class="intel-txt">EUR supported, pro-risk appetite. USD softening on mixed data.</div>
+        </div>
+        <div class="intel-sec">
+          <div class="intel-src">News</div>
+          <div class="intel-hl">EURUSD positive momentum <span class="intel-tag tag-bull">bull</span></div>
+          <div class="intel-hl">EUR/USD Rallies Above 1.1500 <span class="intel-tag tag-bear">bear</span></div>
+          <div class="intel-hl">Drops below 1.1550 warning <span class="intel-tag tag-bear">bear</span></div>
+        </div>
+        <div class="intel-sec">
+          <div class="intel-src">TradingView</div>
+          <div style="font-size:10px">Buy <span style="color:#22c55e;font-weight:700">4</span> Sell <span style="color:#ef4444;font-weight:700">14</span> Neut <span style="color:#94a3b8">8</span></div>
+          <div class="tv-bar"><div class="tv-buy" style="width:15%"></div><div class="tv-neut" style="width:31%"></div><div class="tv-sell" style="width:54%"></div></div>
+          <div style="font-size:9px;color:#475569">MAs: SELL &bull; Osc: NEUTRAL</div>
+        </div>
+        <div class="intel-sec">
+          <div class="intel-src">Reddit</div>
+          <div class="reddit-post">EUR/USD at key support <span class="intel-tag tag-bull">bull</span></div>
+          <div class="reddit-post">Shorting Euro here? <span class="intel-tag tag-bear">bear</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
