@@ -2,6 +2,8 @@
 
 **6E Delta-Hero scanner with multi-timeframe analysis and multi-source sentiment.**
 
+![Trading Monitor](docs/trading-monitor-card.png)
+
 ---
 
 ## What It Does
