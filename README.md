@@ -4,12 +4,6 @@
 
 ---
 
-## Demo
-
-> Screenshots and demo video to be added.
-
----
-
 ## What It Does
 
 Trading Monitor is a real-time scanner for the 6E (EUR/USD Futures) market that detects RSI divergences, computes confluence-based pivot levels, and aggregates sentiment from five sources. It identifies high-probability trade setups by combining technical analysis across multiple timeframes with market sentiment, then delivers alerts through a rich terminal UI.
@@ -21,12 +15,12 @@ Trading Monitor is a real-time scanner for the 6E (EUR/USD Futures) market that 
 - **Multi-Timeframe RSI Divergence Detection** -- Scans for bullish/bearish divergences across configurable timeframes
 - **Confluence-Based Pivot Levels** -- Classifies levels as important (2 confluent) or ultra-important (3+ confluent)
 - **Mega Engine** -- Integrated entry/exit signals, pip hunt detection, and level computation in a unified engine
-- **5-Source Sentiment Aggregation**:
+- **4-Source Sentiment Aggregation**:
   - Reddit (r/Forex, r/Trading) via PRAW
   - Google News via feed parsing
   - Scotia FX Daily reports (PDF extraction via PyMuPDF)
   - TradingView community ideas
-  - LLM-powered sentiment analysis for nuanced scoring
+  - LLM-powered sentiment analysis for composite scoring
 - **Rich Terminal UI** -- Color-coded alerts, market status panels, and sentiment summaries via Rich
 - **Backtesting Suite** -- Multiple backtest modes (standard, combo, optimizer, scheduled) for strategy validation
 - **ATR-Based Filtering** -- Volatility-aware alert thresholds
@@ -36,16 +30,42 @@ Trading Monitor is a real-time scanner for the 6E (EUR/USD Futures) market that 
 
 ---
 
+## Web Dashboard & Trading Console
+
+The project includes a full **FastAPI web server** (`web/`) with ~3,000 lines of Python that turns the scanner into a live, interactive trading console at `localhost:8420`.
+
+- **WebSocket Live Scanning** -- Real-time market scanning with push updates to the browser
+- **HTML Dashboard** -- Multi-panel trading console with levels, delta signals, sentiment, and trade plan
+- **Trading Journal** -- SQLite-backed session tracking with trades, mood, sleep, caffeine, and rule adherence
+- **Apple Health Import** -- Import heart rate, HRV, and sleep data from Apple Health exports to correlate biometrics with trading performance
+- **Health-Performance Correlation** -- Analyze how sleep quality, heart rate, and readiness scores affect trade outcomes
+- **Replay Generation** -- Generate DH|S2 replay HTML from .scid tick data for post-session review
+- **Discipline Lessons** -- 25+ personalized micro-lessons served between scans to reinforce trading discipline
+- **Windows Data Pusher** -- Pull Sierra Chart .scid tick data from Windows PC over the network
+
+### Run the Web Server
+
+```bash
+python -m web
+```
+
+Open [http://localhost:8420](http://localhost:8420).
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
 | Language | Python 3.11+ |
-| Data Feeds | TradingView (tvdatafeed), yfinance |
+| Web Server | FastAPI + Uvicorn + WebSocket |
+| Data Feeds | TradingView (tvdatafeed), yfinance, Sierra Chart (.scid) |
 | Technical Analysis | pandas, pandas_ta, numpy |
 | Sentiment | PRAW (Reddit), PyMuPDF (PDF reports), NLTK |
 | LLM Analysis | LLM-powered sentiment scoring |
-| Output | Rich (terminal UI) |
+| Journal | SQLite (trading sessions, trades, biometrics) |
+| Scheduling | APScheduler (async) |
+| Terminal UI | Rich |
 | Config | Pydantic Settings + python-dotenv |
 | HTTP | requests, certifi |
 
@@ -101,11 +121,23 @@ Sentiment Feeds (Reddit, News, Reports, TV Ideas) --> LLM Analyzer
 src/
   main.py              -- Entry point, scanner loop
   analysis/            -- RSI, divergence, pivots, confluence
-  data/                -- TradingView data fetching
+  data/                -- TradingView data fetching, Sierra .scid parser
   mega/                -- Unified engine (entries, exits, levels, pip hunt)
   sentiment/           -- Reddit, news, reports, TradingView, LLM analyzer
   alerts/              -- Terminal notification rendering
   models/              -- Pydantic type definitions
+web/
+  server.py            -- FastAPI server with WebSocket + background scanner
+  analysis.py          -- Web-specific analysis pipeline
+  sentiment.py         -- Sentiment aggregation for web
+  fetcher.py           -- Data fetcher for web context
+  journal_models.py    -- SQLite models for trading journal
+  journal_analysis.py  -- Session stats, correlations, insights engine
+  journal_health_import.py -- Apple Health XML parser + biometric backfill
+  lessons.py           -- Discipline micro-lesson bank
+  replay_gen.py        -- DH|S2 replay HTML generator from .scid data
+  windows_pusher.py    -- Pull .scid from Windows PC
+  static/              -- Dashboard HTML (index, rules, replay)
 config/
   settings.py          -- Pydantic Settings configuration
   instruments.py       -- Instrument definitions
