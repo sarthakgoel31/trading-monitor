@@ -4,12 +4,12 @@ from typing import Optional
 
 class Settings(BaseSettings):
     # TradingView
-    tv_username: str = ""
-    tv_password: str = ""
+    tv_username: Optional[str] = None
+    tv_password: Optional[str] = None
 
     # Reddit
-    reddit_client_id: str = ""
-    reddit_client_secret: str = ""
+    reddit_client_id: Optional[str] = None
+    reddit_client_secret: Optional[str] = None
     reddit_user_agent: str = "trading-monitor/1.0"
 
     # Twitter (optional, future)
